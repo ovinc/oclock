@@ -26,6 +26,8 @@ while condition:
     timer.pause()  # This is where the timer adapts the waiting time
 ```
 
+#### Methods
+
 The methods associated with the timer class are the following:
 ```python
 timer.change_interval(0.5)  # change interval to 0.5 s
@@ -35,6 +37,16 @@ timer.deactivate()  # immediate exiting of timer
 Note that all these changes take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal (see *\__main.py\__* file of the module for such an example in an asynchronous environment; to run the example, `python -m oclock`).
 
 Also note that after deactivation, the `timer.pause()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately.
+
+#### Attributes
+The attributes associated with the timer class are the following:
+```python
+timer.interval  # (float) value of the current interval in seconds
+self.interval_exceeded  # (bool) True if the contents of the loop take longer to execute than the current requested interval
+self.target  # (float) unix time of the target time for the next loop
+timer.stop_event  # (threading.Event object): is set when timer is deactivated
+```
+
 
 
 ## Requirements
