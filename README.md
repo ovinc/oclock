@@ -1,6 +1,10 @@
 ## General information
 
-**oclock** is a Python 3 module that provides a timer. Its purpose is to provide loops of constant duration no matter what the execution time of the contents of the loop is, and with a possibility to exit the loop at any time including during the waiting period (timer is cancellable).
+**oclock** is a Python 3 module that provides a timing tools :
+
+- The `Timer()` class allows for cancellable loops of constant duration.
+
+- The `countdown()` function is a GUI countdown timer based on the Timer class.
 
 ## Install
 
@@ -21,7 +25,7 @@ pip install .
 
 ## Quick start
 
-The most basic use of the module is
+The most basic use of the `Timer()` class in Python code is
 ```python
 from oclock import Timer
 timer = Timer(interval=1)  # Loops will be of total duration 1 second
@@ -31,6 +35,35 @@ while condition:
         break
     timer.pause()  # This is where the timer adapts the waiting time
 ```
+See next sections for available methods.
+
+To use the countdown GUI, there are two methods:
+
+From a terminal:
+```bash
+python -m oclock 1:45:00   # start timer of duration 1 hour 45 minutes
+python -m oclock 1:45:     # exactly the same as above
+python -m oclock 00:02:00  # start 2-minute timer
+python -m oclock :2:       # exactly the same as above
+python -m oclock 00:00:05  # start 5-second timer
+python -m oclock ::5       # exactly the same as above
+```
+
+From a python console:
+```python
+from oclock import countdown
+countdown(1, 45)      # start timer of duration 1 hour 45 minutes
+countdown(h=1, m=45)  # exactly the same as above
+countdown(0, 2, 0)    # start 2-minute timer
+countdown(m=2)        # exactly the same as above
+countdown(0, 0, 5)    # start 5-second timer
+countdown(s=5)        # exactly the same as above
+```
+
+When countdown is finished, 'Done' is displayed for 5 seconds in the GUI while the console displays *Countdown finished* and emits a sound 5 times in a row. Then the time passed since the end of countdown is displayed as a negative value in red. The program stops when the GUI window is closed.
+
+
+## Timer Class details
 
 #### Methods
 
@@ -40,21 +73,34 @@ timer.change_interval(0.5)  # change interval to 0.5 s
 timer.reset()  # starts counting time from here
 timer.deactivate()  # immediate exiting of timer
 ```
-Note that all these changes take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal (see *\__main.py\__* file of the module for such an example in an asynchronous environment; to run the example, `python -m oclock`).
+Note that all these changes take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal.
 
 Also note that after deactivation, the `timer.pause()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately.
 
 #### Attributes
+
 The attributes associated with the timer class are the following:
 ```python
-timer.interval  # (float) value of the current interval in seconds
+self.interval  # (float) value of the current interval in seconds
 self.interval_exceeded  # (bool) True if the contents of the loop take longerto execute than the current requested interval
 self.name  # optional name to give to the timer with timer=Timer(name='xyz')
 self.warnings  # optional, if True, then there is a warning if the set time interval is too short compared to the execution time, set with Timer(warnings=True)
 self.target  # (float) unix time of the target time for the next loop
-timer.stop_event  # (threading.Event object): is set when timer is deactivated
+self.stop_event  # (threading.Event object): is set when timer is deactivated
 ```
 
+#### Example use
+
+See *example.py* file of the module for such an example in an asynchronous environment; to run the example:
+```bash
+python -m oclock.example
+```
+in a terminal, or
+```python
+from oclock.example import main
+main()
+```
+in a python console. 
 
 
 ## Requirements

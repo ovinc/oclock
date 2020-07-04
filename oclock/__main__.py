@@ -1,66 +1,33 @@
-"""Example of use of the timer class in an asynchronous environment."""
+"""Manage command line parsing for the oclock module."""
 
-import time
-from threading import Event
-from concurrent import futures
-from random import random
+import argparse
 
-from oclock import Timer
+from .countdown import countdown
 
+descr = "GUI countdown clock based on the oclock module."
 
-def random_wait(tmax):
-    """Waits for a random time between 0 and tmax."""
-    time.sleep(tmax*random())
+parser = argparse.ArgumentParser(description=descr,
+                                 formatter_class=argparse.RawTextHelpFormatter)
 
+msg = "Input time in hh:mm:ss format, e.g. 10:30:00, or ::5 (5 seconds)"
 
-def command_line(e_exit, timer):
-    """Input value of dt in s, or any non-number to exit."""
+# The nargs='?' is to have a positional argument with a default value
+parser.add_argument('time', type=str, nargs='?', help=msg)
 
-    while not e_exit.is_set():
-
-        a = input()
-
-        try:
-            dt = float(a)
-        except ValueError:
-            e_exit.set()
-            timer.deactivate()
-        else:
-            timer.change_interval(dt)
+args = parser.parse_args()
 
 
-def main_loop(e_exit, timer):
-    """Prints time since start, with pause at checkpoint managed by timer."""
-
-    t0 = time.time()
-    timer.reset()  # Not obligatory, but ensures timing is counted from here.
-
-    while not e_exit.is_set():
-
-        # wait for a random time between 0 and the total requested interval
-        random_wait(timer.interval)
-
-        # this is where the timer adapts the wait time to the execution time
-        # of the lines above.
-        timer.pause()
-
-        # The lines below are just for visual testing during execution
-        t = time.time()
-        dt = t - t0
-        print(f'current time: {dt:.3f}, next target: {timer.target - t0:.3f}')
+def parse_time(s):
+    try:
+        t = int(s)
+    except ValueError:
+        t = 0
+    return t
 
 
-def main():
-    """Run main_loop at the same time as the command line."""
+timestr = args.time.split(':')
+h = parse_time(timestr[0])
+m = parse_time(timestr[1])
+s = parse_time(timestr[2])
 
-    timer = Timer(interval=2)
-    e_exit = Event()
-
-    with futures.ThreadPoolExecutor() as executor:
-        executor.submit(command_line, e_exit, timer)
-        print('Type new interval in s or any other input to exit')
-        main_loop(e_exit, timer)
-
-
-if __name__ == '__main__':
-    main()
+countdown(h, m, s)
