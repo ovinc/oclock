@@ -1,17 +1,23 @@
 ## General information
 
-This Python 3 module provides a cancellable timer. Its purpose is to provide loops of constant duration no matter what the execution time of the contents of the loop is, and with a possibility to exit the loop at any time including during the waiting period.
+**oclock** is a Python 3 module that provides a timer. Its purpose is to provide loops of constant duration no matter what the execution time of the contents of the loop is, and with a possibility to exit the loop at any time including during the waiting period (timer is cancellable).
 
 ## Install
 
-For now the package is not listed in PyPI, so one needs to do a manual install.
-Follow the steps below:
+#### Method 1
+
+In a terminal:
+```bash
+pip install git+https://cameleon.univ-lyon1.fr/ovincent/oclock
+```
+
+#### Method 2
 
 - Clone the project or download directly the files into a folder.
-- In the command line, `cd` into the project or folder, where the __setup.py__ is.
-- run `python -m pip install .`
-
-Now, the package can be imported in Python with `import oclock`.
+- In a terminal, `cd` into the project or folder, where the __setup.py__ is, then
+```bash
+pip install .
+```
 
 ## Quick start
 
@@ -42,7 +48,9 @@ Also note that after deactivation, the `timer.pause()` command becomes equivalen
 The attributes associated with the timer class are the following:
 ```python
 timer.interval  # (float) value of the current interval in seconds
-self.interval_exceeded  # (bool) True if the contents of the loop take longer to execute than the current requested interval
+self.interval_exceeded  # (bool) True if the contents of the loop take longerto execute than the current requested interval
+self.name  # optional name to give to the timer with timer=Timer(name='xyz')
+self.warnings  # optional, if True, then there is a warning if the set time interval is too short compared to the execution time, set with Timer(warnings=True)
 self.target  # (float) unix time of the target time for the next loop
 timer.stop_event  # (threading.Event object): is set when timer is deactivated
 ```

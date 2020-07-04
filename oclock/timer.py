@@ -6,14 +6,19 @@ from threading import Event
 
 class Timer:
 
-    def __init__(self, interval=1):
+    def __init__(self, interval=1, name='Timer', warnings=False):
 
         self.interval = interval
         self.stop_event = Event()
+
         self.interval_exceeded = False
+        self.warnings = warnings
 
         # This effectively starts the timer when __init__ is called.
         self.target = time.time() + interval
+
+        # Used for distinguishing timers if necessary
+        self.name = name
 
     def pause(self):
         """Waits adequate amount of time to keep the interval constant."""
@@ -31,8 +36,9 @@ class Timer:
         else:
             # if already passed target, move on immediately and set target
             # at a time dt from current time to try again.
-            if self.interval_exceeded:
-                print("Warning, time interval too short.")
+            if not self.interval_exceeded and self.warnings:
+                # to print only the first time the problem happens
+                print(f"\nWarning, time interval too short for {self.name}.")
             self.interval_exceeded = True
             self.target = now + self.interval
 
