@@ -35,6 +35,8 @@ while condition:
         break
     timer.pause()  # This is where the timer adapts the waiting time
 ```
+Note that if *my_function()* takes longer to execute than the required time interval, the Timer class does not try to compensate the extra time by making the next loop shorter. It just aims at making the total duration of the next loop be the requested interval again.
+
 See next sections for available methods.
 
 To use the countdown GUI, there are two methods:
@@ -95,12 +97,21 @@ See *example.py* file of the module for such an example in an asynchronous envir
 ```bash
 python -m oclock.example
 ```
-in a terminal, or
+in a termina from the root of the module, or
 ```python
 from oclock.example import main
 main()
 ```
 in a python console. 
+
+#### Accuracy test
+
+See *test.py* file of the module for functions to test the accuracy of the timer. In particular:
+```python
+from oclock.test import test
+test(dt=0.1, nloops=100, fmax=0.99)
+```
+tests the timing on 1000 loops of requested duration 0.1 second, using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt.
 
 
 ## Requirements

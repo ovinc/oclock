@@ -10,7 +10,9 @@ from oclock import Timer
 
 def random_wait(tmax):
     """Waits for a random time between 0 and tmax."""
-    time.sleep(tmax*random())
+    t = tmax * random()
+    time.sleep(t)
+    return t
 
 
 def command_line(e_exit, timer):
