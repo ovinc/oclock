@@ -25,19 +25,21 @@ pip install .
 
 ## Quick start
 
+#### Loop timer
+
 The most basic use of the `Timer()` class in Python code is
 ```python
 from oclock import Timer
 timer = Timer(interval=1)  # Loops will be of total duration 1 second
 while condition:
-    my_function()  # One assumes here that my_func can set condition to False
-    if not condition:
-        break
-    timer.pause()  # This is where the timer adapts the waiting time
+    my_function()  # can be of any duration between 0 and 1 second
+    timer.pause()
 ```
 Note that if *my_function()* takes longer to execute than the required time interval, the Timer class does not try to compensate the extra time by making the next loop shorter. It just aims at making the total duration of the next loop be the requested interval again.
 
-See next sections for available methods.
+When the timer interacts with other threads in a concurrent environment, it can also be cancelled without having to wait for the end of the *timer.pause()* sleeping period. See details in the *Timer Class details* section below.
+
+#### Countdown GUI
 
 To use the countdown GUI, there are two methods:
 
@@ -97,7 +99,7 @@ See *example.py* file of the module for such an example in an asynchronous envir
 ```bash
 python -m oclock.example
 ```
-in a termina from the root of the module, or
+in a terminal from the root of the module, or
 ```python
 from oclock.example import main
 main()
@@ -112,6 +114,25 @@ from oclock.test import test
 test(dt=0.1, nloops=100, fmax=0.99)
 ```
 tests the timing on 1000 loops of requested duration 0.1 second, using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt.
+
+Below are some quick preliminary results on timing accuracy in an Unix Environment (MacOS) and Windows, using `n=1000`, `fmax=0.99` for various values of `dt`.
+
+###### Unix timing accuracy
+
+|     Requested dt (s)    |   1    | 0.1  | 0.04  | 0.01 | 0.001 |
+|:-----------------------:|:------:|:----:|:-----:|:----:|:-----:|
+|Relative error in dt (%)*|< 0.0001|< 0.01| < 0.1 | 3.5  |  12   |
+|Fluctuations in dt (ms)**|   0.6  | 0.5  |   1   |  1   |  0.2  |
+
+###### Windows timing accuracy
+
+|     Requested dt (s)    |   1   |  0.1  | 0.04 | 0.01 | 0.001 |
+|:-----------------------:|:-----:|:-----:|:----:|:----:|:-----:|
+|Relative error in dt (%)*|< 0.002|  0.9  | 6.1  |  62  |  833  |
+|Fluctuations in dt (ms)**|  6.5  |  7.8  | 7.7  |  6.4 |  3.2  |
+
+(*) measured by averaging all individual loop durations and comparing to the requested dt
+(**) using one standard deviation
 
 
 ## Requirements
