@@ -143,3 +143,7 @@ Python 3. To run some examples, Python : >= 3.6 is needed because of the use of 
 
 Olivier Vincent
 olivier.a-vincent@wanadoo.fr
+
+## Contributors
+
+Icon made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
