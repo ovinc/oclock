@@ -1,4 +1,4 @@
-## General information
+# General information
 
 **oclock** is a Python 3 module that provides a timing tools :
 
@@ -6,16 +6,18 @@
 
 - The `countdown()` function is a GUI countdown timer based on the Timer class.
 
-## Install
+- The `parse_time()` function returns a hours, min, sec tuple from a time string (e.g. `':2:25'`)
 
-#### Method 1
+# Install
+
+## Method 1
 
 In a terminal:
 ```bash
 pip install git+https://cameleon.univ-lyon1.fr/ovincent/oclock
 ```
 
-#### Method 2
+## Method 2
 
 - Clone the project or download directly the files into a folder.
 - In a terminal, `cd` into the project or folder, where the __setup.py__ is, then
@@ -23,9 +25,9 @@ pip install git+https://cameleon.univ-lyon1.fr/ovincent/oclock
 pip install .
 ```
 
-## Quick start
+# Quick start
 
-#### Loop timer
+## Loop timer
 
 The most basic use of the `Timer()` class in Python code is
 ```python
@@ -39,7 +41,7 @@ Note that if *my_function()* takes longer to execute than the required time inte
 
 When the timer interacts with other threads in a concurrent environment, it can also be cancelled without having to wait for the end of the *timer.pause()* sleeping period. See details in the *Timer Class details* section below.
 
-#### Countdown GUI
+## Countdown GUI
 
 To use the countdown GUI, there are two methods:
 
@@ -66,22 +68,29 @@ countdown(s=5)        # exactly the same as above
 
 When countdown is finished, 'Done' is displayed for 5 seconds in the GUI while the console displays *Countdown finished* and emits a sound 5 times in a row. Then the time passed since the end of countdown is displayed as a negative value in red. The program stops when the GUI window is closed.
 
+## Parse time
 
-## Timer Class details
+The `parse_time()` function is used in the argument parsing of the countdown GUI from a terminal (see above). It transforms a string in the form `'h:m:s'` into a tuple `h, m, s`. Inputs of the form e.g. `'::5'` or `:2:`, `'3:30:'` are acceptable for 5 seconds, 2 minutes, and 3.5 hours, respectively.
 
-#### Methods
+# Timer Class details
+
+## Methods
 
 The methods associated with the timer class are the following:
 ```python
 timer.change_interval(0.5)  # change interval to 0.5 s
 timer.reset()  # starts counting time from here
 timer.deactivate()  # immediate exiting of timer
+timer.elapsed_time()  # Time in seconds since init or last reset
+timer.elapsed_time(since_reset=False)  # Time in s since init
 ```
 Note that all these changes take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal.
 
-Also note that after deactivation, the `timer.pause()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately.
+Also note that after deactivation, the `timer.pause()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again.
 
-#### Attributes
+Finally note that the `timer.change_interval()` call cancels any pause() that is in effect in order for the new interval to take effect immediatly, but does not reset the timer: in particular, `elapsed_time()` is not reset to zero.
+
+## Attributes
 
 The attributes associated with the timer class are the following:
 ```python
@@ -91,9 +100,11 @@ self.name  # optional name to give to the timer with timer=Timer(name='xyz')
 self.warnings  # optional, if True, then there is a warning if the set time interval is too short compared to the execution time, set with Timer(warnings=True)
 self.target  # (float) unix time of the target time for the next loop
 self.stop_event  # (threading.Event object): is set when timer is deactivated
+self.init_time   # Unix time at which the timer object has been intanciated
+self.start_time  # Unix time since last reset (or init if no reset made)
 ```
 
-#### Example use
+## Example use
 
 See *example.py* file of the module for such an example in an asynchronous environment; to run the example:
 ```bash
@@ -104,7 +115,7 @@ in a terminal from the root of the module, or
 from oclock.example import main
 main()
 ```
-in a python console. 
+in a python console.
 
 #### Accuracy test
 

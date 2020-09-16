@@ -14,8 +14,11 @@ class Timer:
         self.interval_exceeded = False
         self.warnings = warnings
 
+        self.init_time = time.time()   # is never modified after init
+        self.start_time = time.time()  # can be reset during timer operation
+
         # This effectively starts the timer when __init__ is called.
-        self.target = time.time() + interval
+        self.target = self.start_time + interval
 
         # Used for distinguishing timers if necessary
         self.name = name
@@ -42,16 +45,25 @@ class Timer:
             self.interval_exceeded = True
             self.target = now + self.interval
 
+    def elapsed_time(self, since_reset=True):
+        """Elapsed time (in s) since last reset (default), or init."""
+        if since_reset:
+            return time.time() - self.start_time
+        else:
+            return time.time() - self.init_time
+
     def change_interval(self, interval):
-        """Modify the existing interval to a new value."""
+        """Modify existing interval to a new value, effective immediately."""
         self.deactivate()
         self.interval = interval
-        self.reset()
+        self.target = self.start_time + self.interval
+        self.stop_event.clear()
 
     def reset(self):
-        """Reset timer so that it counts the time interval"""
+        """Reset timer so that it counts the time interval from now on."""
         self.deactivate()
-        self.target = time.time() + self.interval
+        self.start_time = time.time()
+        self.target = self.start_time + self.interval
         self.stop_event.clear()
 
     def deactivate(self):
