@@ -12,10 +12,12 @@ class Timer:
         self.stop_event = Event()
 
         self.interval_exceeded = False
+        self.paused = False
         self.warnings = warnings
 
         self.init_time = time.time()   # is never modified after init
         self.start_time = time.time()  # can be reset during timer operation
+        self.pause_time = 0       # amount of time the system has been paused
 
         # This effectively starts the timer when __init__ is called.
         self.target = self.start_time + interval
@@ -23,13 +25,13 @@ class Timer:
         # Used for distinguishing timers if necessary
         self.name = name
 
-    def pause(self):
-        """Waits adequate amount of time to keep the interval constant."""
+    def checkpt(self):
+        """Waits at current point in program to keep the interval constant."""
 
         now = time.time()
 
         if now < self.target:
-            # if time before the previous pause has not exceeded the
+            # if time before the previous checkpt has not exceeded the
             # required interval, set target to another multiple of the interval
             self.interval_exceeded = False
             w = self.target - now
@@ -47,10 +49,18 @@ class Timer:
 
     def elapsed_time(self, since_reset=True):
         """Elapsed time (in s) since last reset (default), or init."""
-        if since_reset:
-            return time.time() - self.start_time
+
+        now = time.time()
+
+        if self.paused:
+            subtract_time = self.pause_time + now - self.pause_t1
         else:
-            return time.time() - self.init_time
+            subtract_time = self.pause_time
+
+        if since_reset:
+            return now - self.start_time - subtract_time
+        else:
+            return now - self.init_time - subtract_time
 
     def change_interval(self, interval):
         """Modify existing interval to a new value, effective immediately."""
@@ -63,9 +73,21 @@ class Timer:
         """Reset timer so that it counts the time interval from now on."""
         self.deactivate()
         self.start_time = time.time()
+        self.pause_time = 0
         self.target = self.start_time + self.interval
         self.stop_event.clear()
 
     def deactivate(self):
         """Cancel the current waiting immediately."""
         self.stop_event.set()
+
+    def pause(self):
+        """Pause timer until it is restarted."""
+        self.pause_t1 = time.time()
+        self.paused = True
+
+    def restart(self):
+        """Restart timer after pause event."""
+        self.pause_t2 = time.time()
+        self.pause_time += self.pause_t2 - self.pause_t1
+        self.paused = False

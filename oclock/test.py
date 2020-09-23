@@ -21,7 +21,7 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
     """
 
     timer.reset()  # Not obligatory, but ensures timing is counted from here.
-    ts = []  # stores the times of the loop after the pause() call
+    ts = []  # stores the times of the loop after the checkpt() call
     rs = []  # stores the random times generated
 
     for i in range(n):
@@ -31,7 +31,7 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
 
         # this is where the timer adapts the wait time to the execution time
         # of the lines above.
-        timer.pause()
+        timer.checkpt()
 
         t = time.time()
 

@@ -35,11 +35,11 @@ from oclock import Timer
 timer = Timer(interval=1)  # Loops will be of total duration 1 second
 while condition:
     my_function()  # can be of any duration between 0 and 1 second
-    timer.pause()
+    timer.checkpt()
 ```
 Note that if *my_function()* takes longer to execute than the required time interval, the Timer class does not try to compensate the extra time by making the next loop shorter. It just aims at making the total duration of the next loop be the requested interval again.
 
-When the timer interacts with other threads in a concurrent environment, it can also be cancelled without having to wait for the end of the *timer.pause()* sleeping period. See details in the *Timer Class details* section below.
+When the timer interacts with other threads in a concurrent environment, it can also be cancelled without having to wait for the end of the *timer.checkpt()* sleeping period. See details in the *Timer Class details* section below.
 
 ## Countdown GUI
 
@@ -78,17 +78,20 @@ The `parse_time()` function is used in the argument parsing of the countdown GUI
 
 The methods associated with the timer class are the following:
 ```python
+timer.checkpt()  # see above
 timer.change_interval(0.5)  # change interval to 0.5 s
 timer.reset()  # starts counting time from here
 timer.deactivate()  # immediate exiting of timer
 timer.elapsed_time()  # Time in seconds since init or last reset
 timer.elapsed_time(since_reset=False)  # Time in s since init
+timer.pause()  # Simply pauses the elapsed time, but does not act on checkpt()
+timer.restart()  # restarts the elapsed time counter after pause()
 ```
 Note that all these changes take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal.
 
-Also note that after deactivation, the `timer.pause()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again.
+Also note that after deactivation, the `timer.checkpt()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again.
 
-Finally note that the `timer.change_interval()` call cancels any pause() that is in effect in order for the new interval to take effect immediatly, but does not reset the timer: in particular, `elapsed_time()` is not reset to zero.
+Finally note that the `timer.change_interval()` call cancels any checkpt() that is in effect in order for the new interval to take effect immediatly, but does not reset the timer: in particular, `elapsed_time()` is not reset to zero.
 
 ## Attributes
 

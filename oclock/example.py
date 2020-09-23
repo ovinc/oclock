@@ -32,7 +32,7 @@ def command_line(e_exit, timer):
 
 
 def main_loop(e_exit, timer):
-    """Prints time since start, with pause at checkpoint managed by timer."""
+    """Prints time since start, with checkpt at checkpoint managed by timer."""
 
     t0 = time.time()
     timer.reset()  # Not obligatory, but ensures timing is counted from here.
@@ -44,7 +44,7 @@ def main_loop(e_exit, timer):
 
         # this is where the timer adapts the wait time to the execution time
         # of the lines above.
-        timer.pause()
+        timer.checkpt()
 
         # The lines below are just for visual testing during execution
         t = time.time()

@@ -32,7 +32,7 @@ def remaining_time(total_time, timer, e_stop, q_time):
 
     while not e_stop.is_set():
 
-        timer.pause()
+        timer.checkpt()
 
         t_remaining -= timedelta(seconds=1)
         q_time.put(t_remaining)
