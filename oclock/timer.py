@@ -64,17 +64,19 @@ class Timer:
 
     def change_interval(self, interval):
         """Modify existing interval to a new value, effective immediately."""
+        now = time.time()
         self.deactivate()
         self.interval = interval
-        self.target = self.start_time + self.interval
+        self.target = now + interval
         self.stop_event.clear()
 
     def reset(self):
         """Reset timer so that it counts the time interval from now on."""
+        now = time.time()
         self.deactivate()
-        self.start_time = time.time()
         self.pause_time = 0
-        self.target = self.start_time + self.interval
+        self.start_time = now
+        self.target = now + self.interval
         self.stop_event.clear()
 
     def deactivate(self):
