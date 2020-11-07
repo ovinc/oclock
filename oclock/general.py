@@ -58,3 +58,44 @@ def measure_time():
         t = t1 + dt / 2
         timing['time (unix)'] = t
         timing['dt (s)'] = dt
+
+
+@contextmanager
+def measure_time():
+    """Measure mean unix time (s) and time uncertainty (s) of encapsulated commands.
+
+    Returns a dict with keys:
+        - 'time (unix)': (tmax + tmin) / 2
+        - 'dt (s)': (tmax - tmin) / 2
+
+    where tmin, tmax are the unix times before the instructions and after the
+    instructions, respectively.
+
+    Example of uses as a context manager:
+    >>> with measure_time() as timing:
+            my_function()
+        print(timing)
+
+    Out:
+    {'time (unix)': 1604780958.0705943, 'dt (s)': 0.6218999624252319}
+
+    >>> with measure_time() as data:
+            measurement = my_function()  # returns e.g. 3.618
+            data['measurement'] = measurement
+        print(data)
+
+    Out:
+    {'measurement': 3.618,
+     'time (unix)': 1604780958.0705943,
+     'dt (s)': 0.6218999624252319}
+    """
+    timing = {}
+    t1 = time.time()
+    try:
+        yield timing
+    finally:
+        t2 = time.time()
+        dt = (t2 - t1) / 2
+        t = t1 + dt / 2
+        timing['time (unix)'] = t
+        timing['dt (s)'] = dt

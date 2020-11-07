@@ -76,14 +76,26 @@ The `parse_time()` function is used in the argument parsing of the countdown GUI
 
 ## Measure time
 
-Example of use as a context manager:
+Example of uses as a context manager:
 ```python
 from oclock import measure_time
+
+# Example where one just wants to get timing info ----------------------------
 with measure_time() as timing:
     my_function()
 print(timing)
+# Out: {'time (unix)': 1604780958.0705943, 'dt (s)': 0.6218999624252319}
+
+# Example where the timing info is directly added to a data dictionary -------
+with measure_time() as data:
+    measurement = my_function()  # returns e.g. 3.618
+    data['measurement'] = measurement
+print(data)
+# Out: {'measurement': 3.618,
+#       'time (unix)': 1604780958.0705943,
+#       'dt (s)': 0.6218999624252319}
 ```
-will return something like `{'time (unix)': 1604780958.0705943, 'dt (s)': 0.6218999624252319}`
+
 
 # Timer Class details
 
