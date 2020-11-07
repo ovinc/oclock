@@ -1,12 +1,14 @@
 # General information
 
-**oclock** is a Python 3 module that provides a timing tools :
+**oclock** is a Python 3 module that provides timing tools :
 
 - The `Timer()` class allows for cancellable loops of constant duration.
 
 - The `countdown()` function is a GUI countdown timer based on the Timer class.
 
-- The `parse_time()` function returns a hours, min, sec tuple from a time string (e.g. `':2:25'`)
+- The `parse_time()` function returns a (hours, min, sec) tuple from a time string (e.g. `':2:25'`)
+
+- The `measure_time()` is a context manager that measures the average time (unix time) and time uncertainty (+/- dt) at which the encapsulated commands occur.
 
 # Install
 
@@ -72,6 +74,17 @@ When countdown is finished, 'Done' is displayed for 5 seconds in the GUI while t
 
 The `parse_time()` function is used in the argument parsing of the countdown GUI from a terminal (see above). It transforms a string in the form `'h:m:s'` into a tuple `h, m, s`. Inputs of the form e.g. `'::5'` or `:2:`, `'3:30:'` are acceptable for 5 seconds, 2 minutes, and 3.5 hours, respectively.
 
+## Measure time
+
+Example of use as a context manager:
+```python
+from oclock import measure_time
+with measure_time() as timing:
+    my_function()
+print(timing)
+```
+will return something like `{'time (unix)': 1604780958.0705943, 'dt (s)': 0.6218999624252319}`
+
 # Timer Class details
 
 ## Methods
@@ -131,14 +144,15 @@ tests the timing on 1000 loops of requested duration 0.1 second, using within th
 
 Below are some quick preliminary results on timing accuracy in an Unix Environment (MacOS) and Windows, using `n=1000`, `fmax=0.99` for various values of `dt`.
 
-###### Unix timing accuracy
+- **Unix timing accuracy**
 
 |     Requested dt (s)    |   1    | 0.1  | 0.04  | 0.01 | 0.001 |
 |:-----------------------:|:------:|:----:|:-----:|:----:|:-----:|
 |Relative error in dt (%)*|< 0.0001|< 0.01| < 0.1 | 3.5  |  12   |
 |Fluctuations in dt (ms)**|   0.6  | 0.5  |   1   |  1   |  0.2  |
 
-###### Windows timing accuracy
+
+- **Windows timing accuracy**
 
 |     Requested dt (s)    |   1   |  0.1  | 0.04 | 0.01 | 0.001 |
 |:-----------------------:|:-----:|:-----:|:----:|:----:|:-----:|

@@ -4,6 +4,6 @@
 
 from .timer import Timer
 from .countdown import countdown
-from .general import parse_time
+from .general import parse_time, measure_time
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
