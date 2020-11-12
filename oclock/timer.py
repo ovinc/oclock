@@ -8,7 +8,7 @@ class Timer:
 
     def __init__(self, interval=1, name='Timer', warnings=False):
 
-        self.interval = interval
+        self._interval = interval
         self.stop_event = Event()
 
         self.interval_exceeded = False
@@ -62,14 +62,6 @@ class Timer:
         else:
             return now - self.init_time - subtract_time
 
-    def change_interval(self, interval):
-        """Modify existing interval to a new value, effective immediately."""
-        now = time.time()
-        self.deactivate()
-        self.interval = interval
-        self.target = now + interval
-        self.stop_event.clear()
-
     def reset(self):
         """Reset timer so that it counts the time interval from now on."""
         now = time.time()
@@ -93,3 +85,17 @@ class Timer:
         self.pause_t2 = time.time()
         self.pause_time += self.pause_t2 - self.pause_t1
         self.paused = False
+
+    @property
+    def interval(self):
+        """Interval property: time interval of the Timer object."""
+        return self._interval
+
+    @interval.setter
+    def interval(self, value):
+        """Modify existing interval to a new value, effective immediately."""
+        now = time.time()
+        self.deactivate()
+        self._interval = value
+        self.target = now + value
+        self.stop_event.clear()

@@ -34,9 +34,9 @@ pip install .
 The most basic use of the `Timer()` class in Python code is
 ```python
 from oclock import Timer
-timer = Timer(interval=1)  # Loops will be of total duration 1 second
+timer = Timer(interval=2)  # Loops will be of total duration 2 seconds
 while condition:
-    my_function()  # can be of any duration between 0 and 1 second
+    my_function()  # can be of any duration between 0 and 2 seconds
     timer.checkpt()
 ```
 Note that if *my_function()* takes longer to execute than the required time interval, the Timer class does not try to compensate the extra time by making the next loop shorter. It just aims at making the total duration of the next loop be the requested interval again.
@@ -104,25 +104,29 @@ print(data)
 The methods associated with the timer class are the following:
 ```python
 timer.checkpt()  # see above
-timer.change_interval(0.5)  # change interval to 0.5 s
 timer.reset()  # starts counting time from here
 timer.deactivate()  # immediate exiting of timer
 timer.elapsed_time()  # Time in seconds since init or last reset
 timer.elapsed_time(since_reset=False)  # Time in s since init
 timer.pause()  # Simply pauses the elapsed time, but does not act on checkpt()
 timer.restart()  # restarts the elapsed time counter after pause()
+
+# The interval property of the timer can be accessed and changed (getter/setter)
+timer.interval       # get interval (in s)
+timer.interval += 1  # increase interval by 1 second
+timer.interval = 10  # set interval to 10 seconds.
 ```
 Note that all these changes take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal.
 
 Also note that after deactivation, the `timer.checkpt()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again.
 
-Finally note that the `timer.change_interval()` call cancels any checkpt() that is in effect in order for the new interval to take effect immediatly, but does not reset the timer: in particular, `elapsed_time()` is not reset to zero.
+Finally note that a change in `timer.interval` also takes effect immediatly (any checkpt() that is in effect is cancelled), but does not reset the timer: in particular, `elapsed_time()` is not reset to zero.
 
 ## Attributes
 
 The attributes associated with the timer class are the following:
 ```python
-self.interval  # (float) value of the current interval in seconds
+self._interval  # value of the interval getter/setter property (see above)
 self.interval_exceeded  # (bool) True if the contents of the loop take longerto execute than the current requested interval
 self.name  # optional name to give to the timer with timer=Timer(name='xyz')
 self.warnings  # optional, if True, then there is a warning if the set time interval is too short compared to the execution time, set with Timer(warnings=True)
