@@ -8,7 +8,7 @@
 
 - The `parse_time()` function returns a (hours, min, sec) tuple from a time string (e.g. `':2:25'`)
 
-- The `measure_time()` is a context manager that measures the average time (unix time) and time uncertainty (+/- dt) at which the encapsulated commands occur.
+- The `measure_time()` function is a context manager that measures the average time (unix time) and time uncertainty (+/- dt) at which the encapsulated commands occur.
 
 # Install
 
@@ -101,42 +101,53 @@ print(data)
 
 ## Methods
 
-The methods associated with the timer class are the following:
 ```python
 timer.checkpt()  # see above
 timer.reset()  # starts counting time from here
-timer.deactivate()  # immediate exiting of timer
-timer.elapsed_time()  # Time in seconds since init or last reset
-timer.elapsed_time(since_reset=False)  # Time in s since init
+timer.deactivate()  # immediate exiting of timer (see notes below)
 timer.pause()  # Simply pauses the elapsed time, but does not act on checkpt()
-timer.restart()  # restarts the elapsed time counter after pause()
+timer.resume()  # restarts the elapsed time counter after pause()
+```
 
-# The interval property of the timer can be accessed and changed (getter/setter)
+## Properties (settable)
+
+```python
 timer.interval       # get interval (in s)
 timer.interval += 1  # increase interval by 1 second
 timer.interval = 10  # set interval to 10 seconds.
+
+timer.warnings          # get current status of warnings
+timer.warnings = True   # activate warnings if time between checkpts too short
+
+timer.name  # optional name to give to the timer with timer=Timer(name='xyz')
+timer.name = 'Countdown timer'  # can also be set during instantiation
 ```
-Note that all these changes take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal.
 
-Also note that after deactivation, the `timer.checkpt()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again.
+## Attributes (read-only)
 
-Finally note that a change in `timer.interval` also takes effect immediatly (any checkpt() that is in effect is cancelled), but does not reset the timer: in particular, `elapsed_time()` is not reset to zero.
-
-## Attributes
-
-The attributes associated with the timer class are the following:
 ```python
-self._interval  # value of the interval getter/setter property (see above)
-self.interval_exceeded  # (bool) True if the contents of the loop take longerto execute than the current requested interval
-self.name  # optional name to give to the timer with timer=Timer(name='xyz')
-self.warnings  # optional, if True, then there is a warning if the set time interval is too short compared to the execution time, set with Timer(warnings=True)
-self.target  # (float) unix time of the target time for the next loop
-self.stop_event  # (threading.Event object): is set when timer is deactivated
-self.init_time   # Unix time at which the timer object has been intanciated
-self.start_time  # Unix time since last reset (or init if no reset made)
+# Most useful attributes
+timer.elapsed_time  # Time in seconds since init or last reset
+timer.pause_time    # total time (in s) the timer has been paused.
+
+# Other (moslty internal to module methods)
+timer.init_time     # Unix time at which the timer object has been intantiated
+timer.start_time    # Unix time since last reset (or init if no reset made)
+timer.interval_exceeded  # (bool) True if the contents of the loop take longerto execute than the current requested interval
+timer.target  # (float) unix time of the target time for the next loop
+timer.stop_event  # (threading.Event object): is set when timer is deactivated
 ```
 
-## Example use
+## Notes
+
+- Methods take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal.
+
+- A change in `timer.interval` also takes effect immediately (any checkpt() that is in effect is cancelled), but does not reset the timer: in particular, `elapsed_time()` is not reset to zero.
+
+- After deactivation, the `timer.checkpt()` command becomes equivalent to a `pass`, so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again.
+
+
+## Examples
 
 See *example.py* file of the module for such an example in an asynchronous environment; to run the example:
 ```bash
@@ -149,7 +160,7 @@ main()
 ```
 in a python console.
 
-#### Accuracy test
+## Accuracy test
 
 See *test.py* file of the module for functions to test the accuracy of the timer. In particular:
 ```python
@@ -179,11 +190,11 @@ Below are some quick preliminary results on timing accuracy in an Unix Environme
 (**) using one standard deviation
 
 
-## Requirements
+# Requirements
 
 Python 3. To run some examples, Python : >= 3.6 is needed because of the use of f-strings.
 
-## Author
+# Author
 
 Olivier Vincent
 olivier.a-vincent@wanadoo.fr

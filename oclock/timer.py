@@ -17,13 +17,19 @@ class Timer:
 
         self.init_time = time.time()   # is never modified after init
         self.start_time = time.time()  # can be reset during timer operation
-        self.pause_time = 0       # amount of time the system has been paused
+        self._pause_time = 0       # amount of time the system has been paused
 
         # This effectively starts the timer when __init__ is called.
         self.target = self.start_time + interval
 
         # Used for distinguishing timers if necessary
         self.name = name
+
+    def __repr__(self):
+        warning = 'on' if self.warnings else 'off'
+        s = f"{self.__class__}, name '{self.name}', interval {self.interval}s, " \
+            f'warnings {warning.upper()}'
+        return s
 
     def checkpt(self):
         """Waits at current point in program to keep the interval constant."""
@@ -47,26 +53,25 @@ class Timer:
             self.interval_exceeded = True
             self.target = now + self.interval
 
-    def elapsed_time(self, since_reset=True):
-        """Elapsed time (in s) since last reset (default), or init."""
-
-        now = time.time()
-
+    @property
+    def pause_time(self):
         if self.paused:
-            subtract_time = self.pause_time + now - self.pause_t1
+            now = time.time()
+            return self._pause_time + now - self.pause_t1
         else:
-            subtract_time = self.pause_time
+            return self._pause_time
 
-        if since_reset:
-            return now - self.start_time - subtract_time
-        else:
-            return now - self.init_time - subtract_time
+    @property
+    def elapsed_time(self):
+        """Elapsed time (in s) since last reset or init (if no reset)."""
+        now = time.time()
+        return now - self.start_time - self.pause_time
 
     def reset(self):
-        """Reset timer so that it counts the time interval from now on."""
+        """Reset timer so that it counts the time from now on."""
         now = time.time()
         self.deactivate()
-        self.pause_time = 0
+        self._pause_time = 0
         self.start_time = now
         self.target = now + self.interval
         self.stop_event.clear()
@@ -77,14 +82,17 @@ class Timer:
 
     def pause(self):
         """Pause timer until it is restarted."""
-        self.pause_t1 = time.time()
-        self.paused = True
+        if not self.paused:   # do nothing if timer is already paused
+            self.pause_t1 = time.time()
+            self.paused = True
 
-    def restart(self):
+    def resume(self):
         """Restart timer after pause event."""
-        self.pause_t2 = time.time()
-        self.pause_time += self.pause_t2 - self.pause_t1
-        self.paused = False
+        if self.paused:   # do nothing if timer is not paused
+            self.pause_t2 = time.time()
+            self._pause_time += self.pause_t2 - self.pause_t1
+            self.paused = False
+            self.pause_t1, self.pause_t2 = None, None  # reset pause time measurement
 
     @property
     def interval(self):
