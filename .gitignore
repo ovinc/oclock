@@ -1,3 +1,4 @@
 *egg-info*
 *pycache*
-.vscode
+.vscode/
+.eggs/

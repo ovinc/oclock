@@ -1,9 +1,5 @@
-"""Cancellable timer for loops of constant duration."""
-
-# TODO: make pause() and restart() interact with checkpt() (pauses loop)
+"""Timing tools, including cancellable timers for loops of constant duration."""
 
 from .timer import Timer
 from .countdown import countdown
 from .general import parse_time, measure_time
-
-__version__ = '1.0.4'
