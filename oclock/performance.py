@@ -1,14 +1,20 @@
 """Test accuracy of timer for constant-duration loops."""
 
 import time
-
+from random import random
 from queue import Queue
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from . import Timer
-from .example import random_wait
+
+
+def random_wait(tmax):
+    """Waits for a random time between 0 and tmax."""
+    t = tmax * random()
+    time.sleep(t)
+    return t
 
 
 def constant_duration_loop(timer, q, fracmax=0.5, n=10):
@@ -19,7 +25,6 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
     - fracmax is the max fraction of the interval the random time can be
     - n is the number of loops
     """
-
     timer.reset()  # Not obligatory, but ensures timing is counted from here.
     ts = []  # stores the times of the loop after the checkpt() call
     rs = []  # stores the random times generated
@@ -41,15 +46,13 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
     return ts, rs
 
 
-def test(dt, nloops, fmax):
+def performance_test(dt, nloops, fmax, plot=True):
     """Test accuracy of the constant-loop timing using random timing in loop.
 
     - dt is the requested total duration of the loop
     - nloops is the total number of loops
     - fmax is the max fraction of dt that can be taken by the random time.
     """
-
-
     timer = Timer(interval=dt)
     q = Queue()
 
@@ -67,12 +70,15 @@ def test(dt, nloops, fmax):
     print(f'Percentage deviation: {100*(avg - dt)/dt:.4f}%')
     print(f'Std dev / Requested dt: {dev / dt}')
 
+    if plot:
+        fig, ax = plt.subplots()
+        ax.plot(rs[1:], label='random time')
+        ax.plot(dts, label='loop duration')
+        ax.set_ylim((0, 1.5 * dt))
+        ax.set_xlabel('loop number')
+        ax.set_ylabel('dt (s)')
+        ax.grid()
+        ax.legend()
+        plt.show()
 
-    plt.plot(rs[1:], label='random time')
-    plt.plot(dts, label='loop duration')
-    plt.ylim((0, 1.5 * dt))
-    plt.xlabel('loop number')
-    plt.ylabel('dt (s)')
-    plt.legend()
-    plt.show()
-
+    return {'mean dt (s)': avg, 'std dev (s)': dev}

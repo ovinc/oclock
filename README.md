@@ -68,7 +68,7 @@ countdown(0, 0, 5)    # start 5-second timer
 countdown(s=5)        # exactly the same as above
 ```
 
-When countdown is finished, 'Done' is displayed for 5 seconds in the GUI while the console displays *Countdown finished* and emits a sound 5 times in a row. Then the time passed since the end of countdown is displayed as a negative value in red. The program stops when the GUI window is closed.
+When countdown is finished, 'Done' is displayed for 5 seconds in the GUI while the console displays *Countdown finished* and emits a sound (if available) 5 times in a row. Then the time passed since the end of countdown is displayed as a negative value in red. The program stops when the GUI window is closed.
 
 ## Parse time
 
@@ -102,7 +102,7 @@ print(data)
 ## Methods
 
 ```python
-timer.checkpt()  # see above
+timer.checkpt()  # Checkpoint for constant-duration loops, see above
 timer.reset()  # starts counting time from here
 timer.deactivate()  # immediate exiting of timer (see notes below)
 timer.pause()  # Simply pauses the elapsed time, but does not act on checkpt()
@@ -149,23 +149,15 @@ timer.stop_event  # (threading.Event object): is set when timer is deactivated
 
 ## Examples
 
-See *example.py* file of the module for such an example in an asynchronous environment; to run the example:
-```bash
-python -m oclock.example
-```
-in a terminal from the root of the module, or
-```python
-from oclock.example import main
-main()
-```
-in a python console.
+See *example.py* file of the module for an example of the use of the `Timer()` class in an asynchronous environment; to run the example, type `python -m example` in a console from the root of the repository.
+
 
 ## Accuracy test
 
-See *test.py* file of the module for functions to test the accuracy of the timer. In particular:
+See *performance.py* file of the module for functions to test the accuracy of the timer. In particular:
 ```python
-from oclock.test import test
-test(dt=0.1, nloops=100, fmax=0.99)
+from oclock.performance import performance_test
+performance_test(dt=0.1, nloops=100, fmax=0.99)
 ```
 tests the timing on 1000 loops of requested duration 0.1 second, using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt.
 
@@ -190,6 +182,16 @@ Below are some quick preliminary results on timing accuracy in an Unix Environme
 (**) using one standard deviation
 
 
+## Package testing
+
+Testing is done with *pytest* (`pip install pytest`) from the root of the repository. Additional testing can be done by running the example file from the root of the repository.
+```bash
+pytest
+python -m example
+```
+(**Note**: close the interactive countdown window at the end of the pytest run to finish the test.)
+
+
 # Requirements
 
 Python 3. To run some examples, Python : >= 3.6 is needed because of the use of f-strings.
@@ -197,8 +199,4 @@ Python 3. To run some examples, Python : >= 3.6 is needed because of the use of 
 # Author
 
 Olivier Vincent
-olivier.a-vincent@wanadoo.fr
-
-## Contributors
-
-Icon made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+olivier.vincent@ens-paris-saclay.fr

@@ -7,7 +7,8 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 from queue import Queue
 
-from oclock import Timer
+from . import Timer
+from .general import parse_time
 
 
 # ========================== Appearance parameters ===========================
@@ -86,10 +87,15 @@ def gui(total_time, q_time, e_stop):
 # ============================== MAIN FUNCTION ===============================
 
 
-def countdown(h=0, m=0, s=0):
-    """Run the timer and the GUI concurrently."""
+def countdown(time_str):
+    """Run the timer and the GUI concurrently.
 
-    total_time = timedelta(hours=h, minutes=m, seconds=s)
+    Input
+    -----
+    time_str: str (e.g. ::5 for 5 seconds, or 1:30: for 1.5 hours)
+    (see oclock.parse_time() for details)
+    """
+    total_time = parse_time(time_str)
 
     timer = Timer(interval=1)
 
@@ -99,12 +105,3 @@ def countdown(h=0, m=0, s=0):
     with ThreadPoolExecutor() as executor:
         executor.submit(remaining_time, total_time, timer, e_stop, q_time)
         gui(total_time, q_time, e_stop)
-
-
-def main():
-    countdown(s=10)
-
-
-if __name__ == '__main__':
-    main()
-
