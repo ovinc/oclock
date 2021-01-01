@@ -65,10 +65,10 @@ def performance_test(dt, nloops, fmax, plot=False):
     avg = dts.mean()
     dev = dts.std()
 
-    print(f'Mean dt: {avg}, std: {dev}')
-    print(f'Mean dt / Requested dt: {avg / dt}')
+    print(f'Mean dt (s): {avg}, std: {dev}')
+    print(f'Mean dt - Requested dt (ms): {(avg - dt) * 1000}')
     print(f'Percentage deviation: {100*(avg - dt)/dt:.4f}%')
-    print(f'Std dev / Requested dt: {dev / dt}')
+    print(f'Std dev (ms): {dev * 1000}')
 
     if plot:
         import matplotlib.pyplot as plt

@@ -178,30 +178,28 @@ timer.stop_event  # (threading.Event object): is set when timer is deactivated
 See *performance.py* file of the module for functions to test the accuracy of the timer. In particular:
 ```python
 from oclock.performance import performance_test
-performance_test(dt=0.1, nloops=100, fmax=0.99)
+performance_test(dt=0.1, nloops=1000, fmax=0.99)
 ```
-tests the timing on 100 loops of requested duration 0.1 second, using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt (use `plot=True` option to see the results on a matplotlib graph)
+tests the timing on 1000 loops of requested duration 0.1 second, using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt (use `plot=True` option to see the results on a matplotlib graph)
 
-Below are some quick preliminary results on timing accuracy in an Unix Environment (MacOS) and Windows, using `n=1000`, `fmax=0.99` for various values of `dt`.
+Below are some quick preliminary results on timing accuracy in an Unix Environment (MacOS) and Windows, using `nloops=1000`, `fmax=0.99` for various values of `dt`.
 
-- **Unix timing accuracy**
+### Unix
 
-|     Requested dt (s)    |   1    | 0.1  | 0.04  | 0.01 | 0.001 |
-|:-----------------------:|:------:|:----:|:-----:|:----:|:-----:|
-|Relative error in dt (%)*|< 0.0001|< 0.01| < 0.1 | 3.5  |  12   |
-|Fluctuations in dt (ms)**|   0.6  | 0.5  |   1   |  1   |  0.2  |
+|        Requested dt (ms)       | 1000 | 100  | 40 (*) |  10  |  1   |
+|:------------------------------:|:----:|:----:|:------:|:----:|:----:|
+| average dt - requested dt (ms) | 0.03 | 0.01 |  0.24  | 0.03 | 0.02 |
+| standard deviation in dt (ms)  | 1.3  | 2.1  |   2.1  |  0.4 | 0.07 |
 
 
-- **Windows timing accuracy**
+### Windows
 
-|     Requested dt (s)    |   1   |  0.1  | 0.04 | 0.01 | 0.001 |
-|:-----------------------:|:-----:|:-----:|:----:|:----:|:-----:|
-|Relative error in dt (%)*|< 0.002|  0.9  | 6.1  |  62  |  833  |
-|Fluctuations in dt (ms)**|  6.5  |  7.8  | 7.7  |  6.4 |  3.2  |
+|        Requested dt (ms)       | 1000 | 100  | 40 (*) | 10  |  1   |
+|:------------------------------:|:----:|:----:|:------:|:---:|:----:|
+| average dt - requested dt (ms) | 0.01 | 0.18 |  0.76  | 2.1 | 0.79 |
+| standard deviation in dt (ms)  | 6.6  | 6.9  |   7.1  | 5.6 | 0.39 |
 
-(*) measured by averaging all individual loop durations and comparing to the requested dt
-(**) using one standard deviation
-
+(*) corresponds to 25fps
 
 # Development
 
