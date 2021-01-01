@@ -4,7 +4,6 @@ import time
 from random import random
 from queue import Queue
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from . import Timer
@@ -46,12 +45,13 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
     return ts, rs
 
 
-def performance_test(dt, nloops, fmax, plot=True):
+def performance_test(dt, nloops, fmax, plot=False):
     """Test accuracy of the constant-loop timing using random timing in loop.
 
     - dt is the requested total duration of the loop
     - nloops is the total number of loops
     - fmax is the max fraction of dt that can be taken by the random time.
+    - plot: if True, show plot (matplotlib) of timing of all loops
     """
     timer = Timer(interval=dt)
     q = Queue()
@@ -71,6 +71,7 @@ def performance_test(dt, nloops, fmax, plot=True):
     print(f'Std dev / Requested dt: {dev / dt}')
 
     if plot:
+        import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
         ax.plot(rs[1:], label='random time')
         ax.plot(dts, label='loop duration')

@@ -2,3 +2,5 @@
 *pycache*
 .vscode/
 .eggs/
+build/
+dist/
