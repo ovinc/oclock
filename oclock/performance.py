@@ -6,7 +6,7 @@ from queue import Queue
 
 import numpy as np
 
-from . import Timer
+from . import Timer, measure_duration
 
 
 def constant_duration_loop(timer, q, fracmax=0.5, n=10):
@@ -28,8 +28,10 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
     for i in range(n):
 
         # wait for a random time between 0 and the total requested interval / 2
-        r = timer.interval * fracmax * random()
-        time.sleep(r)
+        with measure_duration() as duration:
+            r = timer.interval * fracmax * random()
+            time.sleep(r)
+        sleeptime = duration['duration (s)']
 
         # this is where the timer adapts the wait time to the execution time
         # of the lines above.
@@ -38,9 +40,9 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
         t = time.perf_counter()
 
         ts.append(t)
-        rs.append(r)
+        rs.append(sleeptime)
 
-    return ts, rs
+    return np.array(ts), np.array(rs)
 
 
 def performance_test(dt, nloops, fmax, plot=False, warnings=False):
@@ -70,21 +72,27 @@ def performance_test(dt, nloops, fmax, plot=False, warnings=False):
     if plot:
 
         import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(6, 4))
 
         n = len(dts)
         ii = range(1, n + 1)
 
-        ax.fill_between(ii, rs, label='random time', color='0.9')
-        ax.plot([1, n], [dt, dt], '-', c='0.7', linewidth=3, label='requested')
-        ax.plot([1, n], [avg, avg], '--', c='0.4', linewidth=2, label='average')
-        ax.plot(ii, dts, '.k', label='loop duration')
+        ax.plot([1, n], [dt * 1000, dt * 1000], '-', c='antiquewhite',
+                linewidth=6, label='requested duration')
+
+        ax.fill_between(ii, rs * 1000, label='random time', color='0.9')
+
+        ax.plot(ii, dts * 1000, '.', c='steelblue',
+                label='individual loop duration')
+
+        ax.plot([1, n], [avg * 1000, avg * 1000], ':', c='sandybrown',
+                linewidth=4, label='average loop duration')
 
         ax.set_xlim((1, n))
-        ax.set_ylim((0, dts.max() * 1.05))
+        ax.set_ylim((0, dts.max() * 1050))
 
         ax.set_xlabel('loop number')
-        ax.set_ylabel('dt (s)')
+        ax.set_ylabel(r'$\Delta t$ (ms)')
 
         ax.grid()
         ax.legend()

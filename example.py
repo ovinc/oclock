@@ -36,10 +36,9 @@ def timed_loop(exit_event, timer):
         print('elapsed time: {:.3f}, next target: {:.3f}'
               .format(timer.elapsed_time, timer.target - timer.start_time))
 
-        # wait for a random time between 0 and one fourth of the total requested
-        # interval
+        # wait for a random time between 0 and 100ms
         # (in real use, this would be the function to repeated in a timed manner)
-        time.sleep(timer.interval * random())
+        time.sleep(0.1 * random())
 
         # this is where the timer adapts the wait time to the execution time
         # of the lines above.
@@ -49,7 +48,7 @@ def timed_loop(exit_event, timer):
 def main():
     """Run main_loop at the same time as the command line."""
 
-    timer = Timer(interval=1.5)
+    timer = Timer(interval=1.5, warnings=True)
     exit_event = Event()
 
     thread1 = Thread(target=timed_loop, args=(exit_event, timer))

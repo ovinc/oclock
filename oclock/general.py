@@ -77,12 +77,14 @@ def measure_time():
     """
     timing = {}
     t1 = time.time()
+    t1p = time.perf_counter()
     try:
         yield timing
     finally:
         t2 = time.time()
-        dt = (t2 - t1) / 2
-        t = t1 + dt / 2
+        t2p = time.perf_counter()
+        dt = (t2p - t1p) / 2
+        t = (t1 + t2) / 2
         timing['time (unix)'] = t
         timing['dt (s)'] = dt
 
@@ -93,7 +95,7 @@ def measure_duration():
 
     Output
     ------
-    Float (total duration in seconds)
+    Dict with total duration in seconds (key 'duration (s)')
 
     Example
     -------
@@ -101,6 +103,8 @@ def measure_duration():
             my_function()
         print(duration)
 
+    Out:
+    {'duration (s)': 0.9871297000004233}
     """
     duration = {}
     t1 = time.perf_counter()

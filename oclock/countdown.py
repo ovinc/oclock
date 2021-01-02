@@ -55,6 +55,11 @@ class Countdown:
         Thread(target=clock, args=(self.timer, self.total_time, self.queue)).start()
         self.gui()
 
+    def __repr__(self):
+        """Str representation of Countdown object"""
+        s = "{}, duration {}".format(self.__class__, str(self.total_time))
+        return s
+
 # =============================== GUI Methods ================================
 
     def gui(self):
