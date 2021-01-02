@@ -4,7 +4,7 @@
 import time
 
 from oclock.performance import performance_test
-from oclock import parse_time, measure_time, countdown
+from oclock import parse_time, measure_time, Countdown
 
 
 def test_timer():
@@ -36,4 +36,5 @@ def test_measure():
 
 def test_countdown():
     """Test interactive countdown."""
-    countdown('::5')
+    countdown = Countdown('::5')
+    assert countdown.done

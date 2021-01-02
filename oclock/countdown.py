@@ -12,94 +12,89 @@ from .general import parse_time
 
 # ========================== Appearance parameters ===========================
 
+
 bgcolor = '#0b3c5d'
 textcolor = '#f7f7f7'
 donecolor = '#64d253'
 overduecolor = '#ff4c4c'
 
-# =========================== Secondary functions ============================
 
-def remaining_time(total_time, timer, e_stop, q_time):
-    """Manages time and calculate remaining time
+# =========================== Basic clock function ===========================
 
-    total_time is a timedelta
-    timer is a timer object from the oclock module
-    q_time is a queue that gets the values of remaining time
-    e_stop is an event that exits the program when set
-    """
-    t_remaining = total_time
-    timer.reset()
 
-    while not e_stop.is_set():
-
+def clock(timer, total_time, queue):
+    """Manage time and calculate remaining time (to be threaded)."""
+    while not timer.is_stopped:
         timer.checkpt()
-
-        t_remaining -= timedelta(seconds=1)
-        q_time.put(t_remaining)
-
-
-def update(root, display, q_time):
-    """Define periodic update of GUI."""
-
-    t_remaining = None
-
-    while q_time.qsize() > 0:
-        t_remaining = q_time.get()
-
-    if t_remaining is not None:
-
-        if t_remaining.total_seconds() > 0:  # ----- timer still counting down
-            display.config(text=str(t_remaining))
-
-        elif t_remaining.total_seconds() <= -5:  # ------------- timer overdue
-            time_str = '- ' + str(-t_remaining)
-            display.config(text=time_str, fg=overduecolor)
-
-        else:  # ------------------ timer just done (left on screen for 5 sec)
-            print('\aCountdown Finished!')  # \a is to play sound alert
-            display.config(text='Done!', fg=donecolor)
-
-    root.after(100, update, root, display, q_time)  # update every 0.1 seconds
+        seconds_remaining = total_time.total_seconds() - timer.elapsed_time
+        time_remaining = timedelta(seconds=round(seconds_remaining))
+        queue.put(time_remaining)
 
 
-def gui(total_time, q_time, e_stop):
-    """Set up and start GUI."""
-
-    root = tk.Tk()
-
-    root.geometry("150x75")  # Width x Height
-    root.title("Timer")
-    root.minsize(120, 40)
-    root.config(bg=bgcolor)
-
-    display = tk.Label(root, font=('Helvetica', 30), bg=bgcolor, fg=textcolor,
-                       text=str(total_time))
-
-    display.pack(expand=True)
-
-    update(root, display, q_time)
-    root.mainloop()
-
-    e_stop.set()
+# =========================== Main Countdown Class ===========================
 
 
-# ============================== MAIN FUNCTION ===============================
+class Countdown:
+    """GUI Countdown timer."""
 
+    def __init__(self, time_str):
+        """Init of a Countdown object.
 
-def countdown(time_str):
-    """Run the timer and the GUI concurrently.
+        Input
+        -----
+        time_str: str (e.g. ::5 for 5 seconds, or 1:30: for 1.5 hours)
+        (see oclock.parse_time() for details)
+        """
+        self.total_time = parse_time(time_str)   # timedelta
+        self.timer = Timer(interval=0.2)     # check remaining time every 0.2s
 
-    Input
-    -----
-    time_str: str (e.g. ::5 for 5 seconds, or 1:30: for 1.5 hours)
-    (see oclock.parse_time() for details)
-    """
-    total_time = parse_time(time_str)
+        self.root = tk.Tk()
+        self.queue = Queue()  # queue that gets the values of remaining time
+        self.done = False
 
-    timer = Timer(interval=1)
+        Thread(target=clock, args=(self.timer, self.total_time, self.queue)).start()
+        self.gui()
 
-    q_time = Queue()
-    e_stop = Event()
+# =============================== GUI Methods ================================
 
-    Thread(target=remaining_time, args=(total_time, timer, e_stop, q_time)).start()
-    gui(total_time, q_time, e_stop)
+    def gui(self):
+        """Set up and start GUI."""
+        self.root.geometry("150x75")  # Width x Height
+        self.root.title("Timer")
+        self.root.minsize(170, 40)
+        self.root.config(bg=bgcolor)
+
+        self.display = tk.Label(self.root, font=('Helvetica', 30), bg=bgcolor,
+                                fg=textcolor, text=str(self.total_time))
+
+        self.display.pack(expand=True)
+
+        self.update()
+        self.root.mainloop()
+        self.timer.stop()  # run when window closed --> stop program
+
+    def update(self):
+        """Define periodic update of GUI."""
+
+        t_remaining = None
+
+        while self.queue.qsize() > 0:
+            t_remaining = self.queue.get()
+
+        if t_remaining is not None:
+
+            if t_remaining.total_seconds() > 0:  # ----- timer still counting down
+                self.display.config(text=str(t_remaining))
+
+            elif t_remaining.total_seconds() <= -5:  # ------------- timer overdue
+                time_str = '- ' + str(-t_remaining)
+                self.display.config(text=time_str, fg=overduecolor)
+
+            else:  # ------------------ timer just done (left on screen for 5 sec)
+                if not self.done:        # To print only once
+                    print('Countdown Finished!')
+                    self.display.bell()            # Sound alert
+                    self.display.config(text='Done!', fg=donecolor)
+                    self.done = True
+
+        self.root.after(100, self.update)  # update every 0.1 seconds

@@ -2,7 +2,7 @@
 
 import argparse
 
-from .countdown import countdown
+from .countdown import Countdown
 
 
 descr = "GUI countdown clock based on the oclock module."
@@ -16,4 +16,4 @@ msg = "Input time in hh:mm:ss format, e.g. 10:30:00, or ::5 (5 seconds)"
 parser.add_argument('time', type=str, nargs='?', help=msg)
 
 args = parser.parse_args()
-countdown(args.time)
+countdown = Countdown(args.time)
