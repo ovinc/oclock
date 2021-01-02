@@ -1,98 +1,135 @@
 """Timer for loops of fixed duration, avoiding drift."""
 
+
 import time
 from threading import Event
 
 
 class Timer:
+    """Timer that is cancellable and modifiable in real time."""
 
     def __init__(self, interval=1, name='Timer', warnings=False):
+        """Init oclock.Timer object.
 
+        Parameters
+        ----------
+        interval (float): timer interval in seconds
+        name (str): optional name for description purposes (repr and warnings)
+        warnings (bool): If True, prints warning when time interval exceeded
+        """
         self._interval = interval
-        self.stop_event = Event()
+        self._interval_just_failed = False
 
-        self.interval_exceeded = False
-        self.paused = False
         self.warnings = warnings
-
-        self.init_time = time.time()   # is never modified after init
-        self.start_time = time.time()  # can be reset during timer operation
-        self._pause_time = 0       # amount of time the system has been paused
-
-        # This effectively starts the timer when __init__ is called.
-        self.target = self.start_time + interval
-
-        # Used for distinguishing timers if necessary
         self.name = name
 
+        # used to bypass waiting time when changes or stopping are required
+        self._bypass_checkpt = Event()
+        # used to wait for timer reactivation when in a paused state
+        self._unpause_event = Event()
+
+        self._start()      # Timer starts automatically upon init
+
     def __repr__(self):
-        warning = 'on' if self.warnings else 'off'
-        s = f"{self.__class__}, name '{self.name}', interval {self.interval}s, " \
-            f'warnings {warning.upper()}'
+        """Str representation of Timer object"""
+        warning = 'ON' if self.warnings else 'OFF'
+        s = "{}, name '{}', interval {}s, warnings {}" \
+            .format(self.__class__, self.name, self.interval, warning)
         return s
+
+    def _start(self):
+        """Start timer (not for public use)."""
+        now = time.time()
+        self.start_time = now
+        self.target = now + self._interval
+        self._pause_time = 0
+        self._bypass_checkpt.clear()
+        self.is_paused = False
+        self.is_stopped = False
+
+    def reset(self):
+        """Reset timer immediately."""
+        if self.is_paused:
+            self.resume()
+        self._bypass_checkpt.set()
+        self._start()
+
+    def stop(self):
+        """Stop timer immediately."""
+        if self.is_paused:
+            self.resume()
+        self._unpause_event.set()      # in case stop is called in a paused state
+        self._bypass_checkpt.set()  # cancel any remaining wait at the checkpt
+        self.stop_time = time.time()
+        self.is_stopped = True
+
+    def pause(self):
+        """Pause timer immediately, until it is resumed with resume()."""
+        # do nothing if timer is already paused (also inactive if timer stopped)
+        if not self.is_paused and not self.is_stopped:
+            self._bypass_checkpt.set()
+            self._unpause_event.clear()
+            self._pause_init_time = time.time()
+            self.is_paused = True
+
+    def resume(self):
+        """Resume timer after pause event."""
+        # do nothing if timer is not paused (also inactive if timer stopped)
+        if self.is_paused and not self.is_stopped:
+            now = time.time()
+            self._pause_time += now - self._pause_init_time
+            self.is_paused = False
+            self._unpause_event.set()
 
     def checkpt(self):
         """Waits at current point in program to keep the interval constant."""
 
-        now = time.time()
+        if self.is_paused:  # if timer is paused, wait for reactivation by resume()
 
-        if now < self.target:
-            # if time before the previous checkpt has not exceeded the
-            # required interval, set target to another multiple of the interval
-            self.interval_exceeded = False
-            w = self.target - now
-            self.target += self.interval
-            self.stop_event.wait(w)
+            self._unpause_event.wait()
+
+            # The two lines below (target adjustment and else statement) make
+            # the program liberate the checkpt immediately after a pause, and
+            # sets the next checkpt one interval away
+            self.target = time.time() + self._interval
 
         else:
-            # if already passed target, move on immediately and set target
-            # at a time dt from current time to try again.
-            if not self.interval_exceeded and self.warnings:
-                # to print only the first time the problem happens
-                print(f"\nWarning, time interval too short for {self.name}.")
-            self.interval_exceeded = True
-            self.target = now + self.interval
+
+            if not self.interval_exceeded:
+
+                # if time before the previous checkpt has not exceeded the
+                # required interval, set target to another multiple of dt
+                self._interval_just_failed = False
+                w = self.target - time.time()
+                self.target += self._interval
+                self._bypass_checkpt.wait(w)
+
+            else:
+                # if already passed target, move on immediately and set target
+                # at a time dt from current time to try again.
+                if not self._interval_just_failed and self.warnings:
+                    # only called when interval fails right after being ok
+                    print("Warning, time interval ({}s) too short for {}"
+                          .format(self.interval, self.name))
+                    self._interval_just_failed = True
+                self.target = time.time() + self.interval
+
+        # always reset the bypass event after a checkpt
+        self._bypass_checkpt.clear()
 
     @property
     def pause_time(self):
-        if self.paused:
+        if self.is_paused and not self.is_stopped:
             now = time.time()
-            return self._pause_time + now - self.pause_t1
+            return self._pause_time + now - self._pause_init_time
         else:
             return self._pause_time
 
     @property
     def elapsed_time(self):
         """Elapsed time (in s) since last reset or init (if no reset)."""
-        now = time.time()
-        return now - self.start_time - self.pause_time
-
-    def reset(self):
-        """Reset timer so that it counts the time from now on."""
-        now = time.time()
-        self.deactivate()
-        self._pause_time = 0
-        self.start_time = now
-        self.target = now + self.interval
-        self.stop_event.clear()
-
-    def deactivate(self):
-        """Cancel the current waiting immediately."""
-        self.stop_event.set()
-
-    def pause(self):
-        """Pause timer until it is restarted."""
-        if not self.paused:   # do nothing if timer is already paused
-            self.pause_t1 = time.time()
-            self.paused = True
-
-    def resume(self):
-        """Restart timer after pause event."""
-        if self.paused:   # do nothing if timer is not paused
-            self.pause_t2 = time.time()
-            self._pause_time += self.pause_t2 - self.pause_t1
-            self.paused = False
-            self.pause_t1, self.pause_t2 = None, None  # reset pause time measurement
+        t = time.time() if not self.is_stopped else self.stop_time
+        return t - self.start_time - self.pause_time
 
     @property
     def interval(self):
@@ -102,8 +139,13 @@ class Timer:
     @interval.setter
     def interval(self, value):
         """Modify existing interval to a new value, effective immediately."""
-        now = time.time()
-        self.deactivate()
+        self._bypass_checkpt.set()
         self._interval = value
-        self.target = now + value
-        self.stop_event.clear()
+        self.target = time.time() + value
+
+    @property
+    def interval_exceeded(self):
+        if time.time() < self.target:
+            return False
+        else:
+            return True

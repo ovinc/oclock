@@ -3,8 +3,7 @@
 import tkinter as tk
 from datetime import timedelta
 
-from concurrent.futures import ThreadPoolExecutor
-from threading import Event
+from threading import Thread, Event
 from queue import Queue
 
 from . import Timer
@@ -102,6 +101,5 @@ def countdown(time_str):
     q_time = Queue()
     e_stop = Event()
 
-    with ThreadPoolExecutor() as executor:
-        executor.submit(remaining_time, total_time, timer, e_stop, q_time)
-        gui(total_time, q_time, e_stop)
+    Thread(target=remaining_time, args=(total_time, timer, e_stop, q_time)).start()
+    gui(total_time, q_time, e_stop)

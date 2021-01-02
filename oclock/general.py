@@ -47,14 +47,17 @@ def parse_time(time_str):
 def measure_time():
     """Measure mean unix time (s) and time uncertainty (s) of encapsulated commands.
 
-    Returns a dict with keys:
+    Output
+    ------
+    Dictionary with keys:
         - 'time (unix)': (tmax + tmin) / 2
         - 'dt (s)': (tmax - tmin) / 2
 
     where tmin, tmax are the unix times before the instructions and after the
     instructions, respectively.
 
-    Example of uses as a context manager:
+    Examples
+    --------
     >>> with measure_time() as timing:
             my_function()
         print(timing)
@@ -82,3 +85,27 @@ def measure_time():
         t = t1 + dt / 2
         timing['time (unix)'] = t
         timing['dt (s)'] = dt
+
+
+@contextmanager
+def measure_duration():
+    """Measure duration (s) of encapsulated commands.
+
+    Output
+    ------
+    Float (total duration in seconds)
+
+    Example
+    -------
+    >>> with measure_duration() as duration:
+            my_function()
+        print(duration)
+
+    """
+    duration = {}
+    t1 = time.perf_counter()
+    try:
+        yield duration
+    finally:
+        t2 = time.perf_counter()
+        duration['duration (s)'] = t2 - t1

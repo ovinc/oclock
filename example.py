@@ -20,7 +20,7 @@ def user_input(exit_event, timer):
             dt = float(a)
         except ValueError:
             exit_event.set()
-            timer.deactivate()
+            timer.stop()
         else:
             timer.interval = dt
 
@@ -34,9 +34,10 @@ def timed_loop(exit_event, timer):
 
         # Only to show timer status, for information
         print('elapsed time: {:.3f}, next target: {:.3f}'
-              .format(timer.elapsed_time, timer.target - timer.init_time))
+              .format(timer.elapsed_time, timer.target - timer.start_time))
 
-        # wait for a random time between 0 and the total requested interval
+        # wait for a random time between 0 and one fourth of the total requested
+        # interval
         # (in real use, this would be the function to repeated in a timed manner)
         time.sleep(timer.interval * random())
 
