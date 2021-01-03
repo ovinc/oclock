@@ -2,35 +2,34 @@
 
 
 import time
-from threading import Event, Thread
+from threading import Thread
 from random import random
 
 from oclock import Timer
 
 
-def user_input(exit_event, timer):
+def user_input(timer):
     """Command line input to change the time interval of the timer or exit.
 
     To change time interval: input value of time interval (s)
     To exit: input any non-number to exit.
     """
-    while not exit_event.is_set():
+    while not timer.is_stopped:
         a = input()
         try:
             dt = float(a)
         except ValueError:
-            exit_event.set()
             timer.stop()
         else:
             timer.interval = dt
 
 
-def timed_loop(exit_event, timer):
+def timed_loop(timer):
     """Loop with function to be repeated at regular time intervals."""
 
     timer.reset()  # Not obligatory, but ensures timing is counted from here.
 
-    while not exit_event.is_set():
+    while not timer.is_stopped:
 
         # Only to show timer status, for information
         print('elapsed time: {:.3f}, next target: {:.3f}'
@@ -49,10 +48,9 @@ def main():
     """Run main_loop at the same time as the command line."""
 
     timer = Timer(interval=1.5, warnings=True)
-    exit_event = Event()
 
-    thread1 = Thread(target=timed_loop, args=(exit_event, timer))
-    thread2 = Thread(target=user_input, args=(exit_event, timer))
+    thread1 = Thread(target=timed_loop, args=(timer,))
+    thread2 = Thread(target=user_input, args=(timer,))
     threads = thread1, thread2
 
     print('Input value of time interval (s) or any non-number to exit')
