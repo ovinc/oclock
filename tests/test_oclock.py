@@ -1,10 +1,9 @@
 """Test oclock module with pytest"""
 
-
 import time
 
 from oclock.performance import performance_test
-from oclock import parse_time, measure_time, Countdown
+from oclock import parse_time, measure_time, measure_duration, Countdown
 
 
 def test_timer():
@@ -27,11 +26,18 @@ def test_parse():
         assert t.total_seconds() == s
 
 
-def test_measure():
+def test_measure_time():
     """Test measure_time() context manager."""
     with measure_time() as timing:
         time.sleep(1)
     assert round(timing['dt (s)'], 1) == 0.5
+
+
+def test_measure_duration():
+    """Test measure_time() context manager."""
+    with measure_duration() as duration:
+        time.sleep(1)
+    assert round(duration['duration (s)'], 1) == 1
 
 
 def test_countdown():

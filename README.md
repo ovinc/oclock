@@ -1,17 +1,17 @@
 # General information
 
-**oclock** is a Python 3 package that provides various timing tools :
+**oclock** is a Python 3 package. Its main goal is to provide a simple way to create timed loops with constant time intervals and no drift. It also provides various other timing tools and a GUI timer. It contains:
 
-- The `Timer` class:
+- `Timer` class:
     * can be used as a regular timer with `pause()`, `stop()`, etc. methods,
     * can also be used to make loops of constant duration independently of loop contents (using the `checkpt()` method), without drift,
     * is immediately modifiable and/or cancellable in threaded environments (with cancellable sleeping times).
 
-- The `Countdown` class starts a GUI countdown timer.
+- `Countdown` class: GUI countdown timer.
 
-- The `parse_time()` function returns a `datetime.timedelta` from a time string (e.g. `':2:25'`).
+- `parse_time()` function: returns a `datetime.timedelta` from a time string (e.g. `':2:25'`).
 
-- The `measure_time()` and `measure_duration()` functions are context managers for measuring time and execution times / time uncertainty of encapsulated commands.
+- `measure_time()` and `measure_duration()` functions: are context managers for measuring time and execution times / time uncertainty of encapsulated commands.
 
 # Quick start
 
@@ -105,7 +105,7 @@ See *Timer Class details* section below for all methods, properties and attribut
 
 A simple graphical countdown timer based on the `Timer` class. It can be used either as a python main program from a shell, or as a function in Python code or console.
 
-<img src="media/countdown.gif">
+![](https://raw.githubusercontent.com/ovinc/oclock/master/media/countdown.gif)
 
 From a terminal:
 ```bash
@@ -236,45 +236,52 @@ Below are some quick preliminary results on timing accuracy in an Unix Environme
 
 ### Unix (MacOS)
 
-|       Requested `dt` (ms)      | 1000 | 100 (*) | 40 |  10 (**) |  1   |
-|:------------------------------:|:----:|:----:|:------:|:----:|:----:|
-| average `dt` - requested `dt` (ms) | 0.03 | 0.01 |  0.24  | 0.03 | 0.02 |
-| standard deviation in `dt` (ms)  | 1.3  | 2.1  |   2.1  |  0.4 | 0.07 |
+|         Requested `dt` (ms)        |  1000  | 100 (*) |   40    | 10 (**) |    1    |
+|:----------------------------------:|:------:|:-------:|:-------:|:-------:|:-------:|
+| average `dt` - requested `dt` (ms) | 0.0012 | 0.00012 | 0.00016 | 0.00005 | 0.00023 |
+| standard deviation in `dt` (ms)    | 0.48   | 0.36    |   0.31  |  0.23   | 0.08    |
 
 (*) corresponding graph:
 
-<img src="media/img/OClockMac100ms.png" width=400>
+![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_macos_100ms.png)
 
 (**) corresponding graph:
 
-<img src="media/img/OClockMac10ms.png" width=400>
+![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_macos_10ms.png)
+
 
 ### Windows
 
-|       Requested `dt` (ms)      | 1000 | 100 (*) | 40 | 10 (**)  |  1   |
-|:------------------------------:|:----:|:----:|:------:|:---:|:----:|
-| average `dt` - requested `dt` (ms) | 0.01 | 0.18 |  0.76  | 2.1 | 0.79 |
-| standard deviation in `dt` (ms)  | 6.6  | 6.9  |   7.1  | 5.6 | 0.39 |
+|         Requested `dt` (ms)        | 1000  | 100 (*) |   40    | 10 (**) |  1  |
+|:----------------------------------:|:-----:|:-------:|:-------:|:-------:|:---:|
+| average `dt` - requested `dt` (ms) | 0.014 | 0.0015  | 0.0013  |  1.2    | 1.1 |
+| standard deviation in `dt` (ms)    | 7.0   | 7.1     |  7.0    |  5.6    | 1.9 |
 
 
 (*) corresponding graph:
 
-<img src="media/img/OClockWindows100ms.png" width=400>
+![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_windows_100ms.png)
 
 (**) corresponding graph:
 
-<img src="media/img/OClockWindows10ms.png" width=400>
+![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_windows_10ms.png)
 
 
 ## Behavior when interval is exceeded
 
 As explained above, it the contents of the loop take longer to execute than the requested time interval, the Timer simply moves on to the next loop but does not try to compensate for the extra time by making the next loop shorter:
 
-<img src="media/img/OClockIntervalExceeded.png" width=400>
+![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_interval_exceeded.png)
 
 
 
 # Development
+
+Install the package by cloning the GitHub repo (https://github.com/ovinc/oclock.git) and install in editable mode from the root of the repo:
+```
+pip install -e .
+```
+(or `python setup.py install`)
 
 Package requirements to run the tests:
 - pytest
@@ -293,7 +300,9 @@ python -m example
 
 See *Accuracy Test* paragraph above to run performance tests for constant-duration loops with the `Timer` class.
 
-Pull requests must be submitted with commits in branch *authors*.
+Pull requests must be submitted on GitHub (https://github.com/ovinc/oclock) with commits (preferably squashed into a single commit) in branch *authors*.
+
+Version number is automatically extracted from git tag using *setuptools_scm*.
 
 # Requirements
 
