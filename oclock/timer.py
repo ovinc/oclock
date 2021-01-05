@@ -2,7 +2,9 @@
 
 
 import time
-from threading import Event
+#from threading import Event
+from .event import Event
+
 
 
 class Timer:
