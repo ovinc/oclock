@@ -175,6 +175,18 @@ print(data)
 
 # Timer Class details
 
+## Instantiation
+
+```python
+from oclock import Timer
+timer = Timer(interval=1, name='Timer', warnings=False)
+```
+
+Parameters:
+- `interval` (float): timer interval in seconds
+- `name` (str): optional name for description purposes (repr and warnings)
+- `warnings` (bool): If True, prints warning when time interval exceeded
+
 ## Methods
 
 ```python
@@ -216,9 +228,9 @@ timer.target  # (float) unix time of the target time for the next loop
 
 ## Notes
 
-- Methods take effect immediately, even if the timer is in a waiting phase, which can be useful if the loop is controlled by an external signal.
+- As mentioned previously, methods take effect immediately, even if the timer is in a waiting phase.
 
-- A change in `interval` also takes effect immediately (any checkpt() that is in effect is cancelled), but does not reset the timer: in particular, `elapsed_time` is not reset to zero.
+- A change in `interval` also takes effect immediately (any checkpt() that is in effect is bypassed), but does not reset the timer: in particular, `elapsed_time` is not reset to zero.
 
 - After calling `pause()`, the `checkpt()` command blocks until `resume()` is called, however in the current version after `stop()` the `checkpt()` becomes non-blocking (equivalent to a `pass`), so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again. This means that it is useful to pin the condition of the loop to the stopping of the timer (see examples above).
 
@@ -230,7 +242,7 @@ See *performance.py* file of the module for functions to test the accuracy of th
 from oclock.performance import performance_test
 performance_test(dt=0.1, nloops=1000, fmax=0.99)
 ```
-tests the timing on 1000 loops of requested duration 0.1 second (100ms), using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt (use `plot=True` option to see the results on a matplotlib graph, and `warnings=True` to have a printed warning when the execution time of the nested commands exceed the target duration of the loop).
+tests the timing on 1000 loops of requested duration 0.1 second (100ms), using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt (use `plot=True` option to see the results on a *matplotlib* graph, and `warnings=True` to have a printed warning when the execution time of the nested commands exceed the target duration of the loop).
 
 Below are some quick preliminary results on timing accuracy in an Unix Environment (MacOS) and Windows, using `nloops=1000`, `fmax=0.5` for various values of `dt`. As can be seen, The Timer seems to perform well in Unix environments even down to millisecond intervals (1000fps), while it starts having difficulties below 40 ms intervals in Windows (25 fps).
 
@@ -281,7 +293,6 @@ Install the package by cloning the GitHub repo (https://github.com/ovinc/oclock.
 ```
 pip install -e .
 ```
-(or `python setup.py install`)
 
 Package requirements to run the tests:
 - pytest
@@ -306,11 +317,17 @@ Version number is automatically extracted from git tag using *setuptools_scm*.
 
 # Requirements
 
-Python >= 3.6
-(but could be easily changed to work with all python 3.x versions by removing f-strings)
+Python 3.x
+
+(Tests only made from python 3.5 to python 3.9 included)
 
 # Author
 
 Olivier Vincent
 
-olivier.vincent@ens-paris-saclay.fr
+ovinc.py@gmail.com
+
+
+# License
+
+BSD 3-Clause (see *LICENCE* file).

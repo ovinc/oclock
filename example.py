@@ -6,22 +6,7 @@ from threading import Thread
 from random import random
 
 from oclock import Timer
-
-
-def user_input(timer):
-    """Command line input to change the time interval of the timer or exit.
-
-    To change time interval: input value of time interval (s)
-    To exit: input any non-number to exit.
-    """
-    while not timer.is_stopped:
-        a = input()
-        try:
-            dt = float(a)
-        except ValueError:
-            timer.stop()
-        else:
-            timer.interval = dt
+from oclock.loop import cli
 
 
 def timed_loop(timer):
@@ -32,8 +17,8 @@ def timed_loop(timer):
     while not timer.is_stopped:
 
         # Only to show timer status, for information
-        print('elapsed time: {:.3f}, next target: {:.3f}'
-              .format(timer.elapsed_time, timer.target - timer.start_time))
+        print('elapsed time: {:.3f}, next checkpt at: {:.3f}'
+              .format(timer.elapsed_time, timer.next_checkpt_release - timer.start_time))
 
         # wait for a random time between 0 and 100ms
         # (in real use, this would be the function to repeated in a timed manner)
@@ -49,17 +34,10 @@ def main():
 
     timer = Timer(interval=1.5, warnings=True)
 
-    thread1 = Thread(target=timed_loop, args=(timer,))
-    thread2 = Thread(target=user_input, args=(timer,))
-    threads = thread1, thread2
+    Thread(target=timed_loop, args=(timer,)).start()
 
-    print('Input value of time interval (s) or any non-number to exit')
-
-    for thread in threads:
-        thread.start()
-
-    for thread in threads:
-        thread.join()
+    # CLI is a simple command line interface to interact with the timer
+    cli(timer)
 
     print('Program Exited')
 

@@ -39,9 +39,10 @@ class Timer:
 
     def _start(self):
         """Start timer (not for public use)."""
-        now = time.perf_counter()
+        now = self.now()
         self.start_time = now
-        self.target = now + self._interval
+        self._target = now + self._interval
+        self.next_checkpt_release = self._target
         self._pause_time = 0
         self._bypass_checkpt.clear()
         self.is_paused = False
@@ -60,7 +61,7 @@ class Timer:
             self.resume()
         self._unpause_event.set()      # in case stop is called in a paused state
         self._bypass_checkpt.set()  # cancel any remaining wait at the checkpt
-        self.stop_time = time.perf_counter()
+        self.stop_time = self.now()
         self.is_stopped = True
 
     def pause(self):
@@ -69,15 +70,14 @@ class Timer:
         if not self.is_paused and not self.is_stopped:
             self._bypass_checkpt.set()
             self._unpause_event.clear()
-            self._pause_init_time = time.perf_counter()
+            self._pause_init_time = self.now()
             self.is_paused = True
 
     def resume(self):
         """Resume timer after pause event."""
         # do nothing if timer is not paused (also inactive if timer stopped)
         if self.is_paused and not self.is_stopped:
-            now = time.perf_counter()
-            self._pause_time += now - self._pause_init_time
+            self._pause_time += self.now() - self._pause_init_time
             self.is_paused = False
             self._unpause_event.set()
 
@@ -91,7 +91,7 @@ class Timer:
             # The two lines below (target adjustment and else statement) make
             # the program liberate the checkpt immediately after a pause, and
             # sets the next checkpt one interval away
-            self.target = time.perf_counter() + self._interval
+            self._target = self.now() + self._interval
 
         else:
 
@@ -106,8 +106,8 @@ class Timer:
                           .format(self.interval, self.name))
                 self._interval_failed = False
 
-                w = self.target - time.perf_counter()
-                self.target += self._interval
+                w = self._target - self.now()
+                self._target += self._interval
                 self._bypass_checkpt.wait(w)
 
             else:
@@ -121,24 +121,31 @@ class Timer:
                           .format(self.interval, self.name))
                 self._interval_failed = True
 
-                self.target = time.perf_counter() + self.interval
+                self._target = self.now() + self.interval
 
         # always reset the bypass event after a checkpt
         self._bypass_checkpt.clear()
+        self.next_checkpt_release = self._target
 
     @property
     def pause_time(self):
+        """Total duration (s) during which the timer has been paused."""
         if self.is_paused and not self.is_stopped:
-            now = time.perf_counter()
+            now = self.now()
             return self._pause_time + now - self._pause_init_time
         else:
             return self._pause_time
 
     @property
+    def total_time(self):
+        """Total time (s) since init or reset, stops with timer.stop()."""
+        t = self.now() if not self.is_stopped else self.stop_time
+        return t - self.start_time
+
+    @property
     def elapsed_time(self):
-        """Elapsed time (in s) since last reset or init (if no reset)."""
-        t = time.perf_counter() if not self.is_stopped else self.stop_time
-        return t - self.start_time - self.pause_time
+        """Elapsed time (in s) since init or reset."""
+        return self.total_time - self.pause_time
 
     @property
     def interval(self):
@@ -148,13 +155,21 @@ class Timer:
     @interval.setter
     def interval(self, value):
         """Modify existing interval to a new value, effective immediately."""
-        self._bypass_checkpt.set()
-        self._interval = value
-        self.target = time.perf_counter() + value
+        if value < 0:
+            raise ValueError('Timer interval must be positive')
+        else:
+            self._interval = value
+            self._target = self.now() + value
+            self._bypass_checkpt.set()
 
     @property
     def interval_exceeded(self):
-        if time.perf_counter() < self.target:
+        if self.now() < self._target:
             return False
         else:
             return True
+
+    @staticmethod
+    def now():
+        """Define what is considered as current time"""
+        return time.perf_counter()
