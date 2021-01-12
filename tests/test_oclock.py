@@ -1,13 +1,14 @@
 """Test oclock module with pytest"""
 
-import time
+import time, threading, random
 
 from oclock.performance import performance_test
-from oclock import parse_time, measure_time, measure_duration, Countdown
+from oclock import Timer, Countdown, loop
+from oclock import parse_time, measure_time, measure_duration
 
 
 def test_timer():
-    """Test Timer() class."""
+    """Test Timer() class (checkpt() and interval)"""
     data = performance_test(dt=0.05, nloops=40, fmax=0.9, plot=False)
     assert round(data['mean dt (s)'], 2) == 0.05
 
@@ -16,6 +17,37 @@ def test_timer_precise():
     """Test Timer() class in precise mode (precision not tested here)"""
     data = performance_test(dt=0.05, nloops=40, fmax=0.9, plot=False, precise=True)
     assert round(data['mean dt (s)'], 2) == 0.05
+
+
+def test_decorator():
+    """Test the @loop decorator and various Timer methods"""
+
+    timer = Timer(interval=0.1)
+    dt = 0.6  # interval between commands
+
+    def timer_control(timer):
+        """define a succession of commands to apply to the timer."""
+        methods = timer.reset, timer.pause, timer.resume, timer.stop
+        print('timer interval: {}'.format(timer.interval))
+        print('interval between commands: {}'.format(dt))
+        for method in methods:
+            time.sleep(dt)
+            print(method)
+            print('elapsed/paused before method: {:.3f}/{:.3f}'
+                  .format(timer.elapsed_time, timer.pause_time))
+            method()
+            print('elapsed/paused after method: {:.3f}/{:.3f}'
+                  .format(timer.elapsed_time, timer.pause_time))
+
+    @loop(timer)
+    def my_function():
+        time.sleep(0.05 * random.random())
+
+    threading.Thread(target=timer_control, args=(timer,)).start()
+    my_function()
+
+    assert round(timer.elapsed_time, 1) == 2 * dt
+    assert round(timer.pause_time, 1) == dt
 
 
 def test_parse():

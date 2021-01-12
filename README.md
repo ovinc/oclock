@@ -1,17 +1,21 @@
-# General information
+# About
 
-**oclock** is a Python 3 package. Its main goal is to provide a simple way to create timed loops with constant time intervals and no drift. It also provides various other timing tools and a GUI timer. It contains:
+**oclock** is a Python 3 package. Its main goal is to provide a simple way to create timed loops with constant time intervals and no drift. It also provides various other timing tools and a GUI time.
 
-- `Timer` class:
-    * can be used as a regular timer with `pause()`, `stop()`, etc. methods,
-    * can also be used to make loops of constant duration independently of loop contents (using the `checkpt()` method), without drift,
-    * is immediately modifiable and/or cancellable in threaded environments (with cancellable sleeping times).
+### Timed loops
 
-- `Countdown` class: GUI countdown timer.
+No drift, timed loops are based on the `Timer` class,
+- either using the `checkpt()` method at a location in a for/while loop acting as a reference point to maintain constant duration from one loop to the next,
+- or using the `@loop` or `@interactiveloop` decorators that use `Timer` and `checkpt()` in the background.
 
+The timing (interval) and execution (pause/stop etc.) can be modified in real time thanks to cancellable sleeping times.
+
+### Other tools
+
+- `Countdown`: a class that starts a GUI countdown timer.
 - `parse_time()` function: returns a `datetime.timedelta` from a time string (e.g. `':2:25'`).
-
 - `measure_time()` and `measure_duration()` functions: are context managers for measuring time and execution times / time uncertainty of encapsulated commands.
+- Note that the `Timer` class can also be used as a regular chronometer with its methods `pause()`, `resume()`, `stop()` etc.
 
 # Quick start
 
@@ -21,9 +25,14 @@
 pip install oclock
 ```
 
-## Timer
+## Timed Loops
 
-The `Timer` class is mostly designed to create loops of constant duration without drift, while allowing immediate modification/cancellation (sleep time interruption) in threaded environments. It can also be used as a regular timer.
+The `Timer` class is mostly designed to create loops of constant duration without drift, while allowing immediate modification/cancellation (sleep time interruption) in threaded environments. It can also be used as a regular chronometer.
+
+Below are some peudo-code quick-start examples. For complete, working examples, see:
+- *Examples.ipynb* notebook (https://github.com/ovinc/oclock/blob/master/Example.ipynb)
+- *example.py* script (https://github.com/ovinc/oclock/blob/master/example.py)
+
 
 ### Constant-duration loops
 
@@ -35,11 +44,28 @@ while condition:
     my_function()  # can be of any duration between 0 and 2 seconds
     timer.checkpt()
 ```
-The `checkpt()` method waits the adequate amount of time to make the loop of constant duration, without drift (using a target regularly spaced in time).
+The `checkpt()` method waits the adequate amount of time to make the loop of constant duration, without drift (using a target regularly spaced in time); `condition` can include timer methods and attributes, e.g. `timer.elapsed_time < max_time`.
 
 Note that if *my_function()* takes longer to execute than the required time interval, the Timer class does not try to compensate the extra time by making the next loop shorter. It just aims at making the total duration of the next loop be the requested interval again (see *Behavior when interval is exceeded* section below).
 
-### Immediate modification/cancellation
+The same behavior can be achieved using the `@loop` decorator:
+```python
+from oclock import loop
+timer = Timer(interval=2)  # Loops will be of total duration 2 seconds
+@loop(timer)
+def my_function():
+    ...
+```
+Then, calling `my_function()` will execute the contents of the function in a repeated manner.
+
+The `@loop` execution exits automatically if the timer is stopped.
+Thus, It is useful to include a condition in `my_function` to exit the loop when needed, e.g.
+```python
+if timer.elapsed_time > t_max:
+    timer.stop()
+```
+
+### Interactive modification/cancellation
 
 The timer is also modifiable (change time interval) and cancellable in real time (i.e. even when the timer is in a `checkpt()` waiting phase). To do so, it must be accessed by another thread that runs concurrently. For example:
 
@@ -47,8 +73,8 @@ The timer is also modifiable (change time interval) and cancellable in real time
 from oclock import Timer
 from threading import Thread
 
-def user_input(exit_event, timer):
-    """Command line input to change the time interval of the timer or exit."""
+def user_input(timer):
+    """Threaded command line input to change time interval or exit timer."""
     while not timer.is_stopped:
         a = input()
         try:
@@ -59,18 +85,20 @@ def user_input(exit_event, timer):
             timer.interval = dt
 
 timer = Timer(interval=2)
-
-# CLI to interact with timer
 Thread(target=user_input, args=(exit_event, timer)).start()
 
 while not timer.is_stopped:
     my_function()
     timer.checkpt()
 ```
-
-See example.py for a more detailed, working example. The program can be started with `python -m example` (e.g. from the root of the *oclock* repository).
-
-Note that the `Timer` object can also be paused, resumed, stopped and reset using the corresponding methods (see *Regular Timer* paragraph below), but these methods have not been tested yet in a cancellable/threaded environment (*TO DO*).
+During operation, the `Timer` object can be paused, resumed, stopped and reset using the corresponding `Timer` methods (see *Regular Timer* paragraph below). The *oclock* module also provides a simple command line interface to create a timed loop for a function and interact with it dynamically using the `@interactiveloop` decorator:
+```python
+from oclock import interactiveloop
+@interactiveloop(interval=2)
+def my_function():
+    ...
+```
+Now when `my_function()` is called, an interactive CLI thread starts at the same time where the user can pause/resume/reset/stop the timer in real time, change its interval, and print timing information.
 
 ### Regular Timer
 
@@ -82,17 +110,18 @@ from oclock import Timer
 # The timer starts counting time immediately upon instantiation.
 timer = Timer()
 
-# Temporarily stop counting time
+# Temporarily pause, then resume timer
 timer.pause()
 timer.resume()
 
 # Stop and restart timer completely
 timer.stop()
-timer.reset()  # can be called without calling stop() first
+timer.reset()  # note: can be called without calling stop() first
 
 # At any time, the elapsed time and total pause duration can be accessed with
 timer.elapsed_time
 timer.pause_time
+timer.total_time  # sum of the two other times
 ```
 
 **Important Note**: Do not use the `checkpt()` method after a `pause()` call if not in a threaded environment, this will cause the program to be in a perpetual waiting state. In a threaded environment, call `resume()` to unpause.
@@ -193,7 +222,7 @@ Parameters:
 ## Methods
 
 ```python
-timer.checkpt()  # Checkpoint for constant-duration loops, see above
+timer.checkpt()  # Reference point for constant-duration loops, see above
 
 timer.pause()    # Immediately pause timer and put checkpt() in waiting phase
 timer.resume()   # Restart the elapsed time counter and unlock checkpt()
@@ -212,8 +241,8 @@ timer.interval = 10  # set interval to 10 seconds.
 timer.warnings          # get current status of warnings
 timer.warnings = True   # activate warnings if time between checkpts too short
 
-timer.name  # optional name to give to the timer with timer=Timer(name='xyz')
-timer.name = 'Countdown timer'  # can also be set during instantiation
+timer.name                      # optional name (for repr and warnings)
+timer.name = 'Countdown timer'  # (can also be set during instantiation)
 ```
 
 ## Attributes (read-only)
@@ -222,20 +251,23 @@ timer.name = 'Countdown timer'  # can also be set during instantiation
 # Most useful attributes
 timer.elapsed_time  # Time in seconds since init or last reset
 timer.pause_time    # total time (in s) the timer has been paused.
+timer.total_time    # Sum of the last two
+```
 
-# Other (moslty internal to module methods)
-timer.start_time         # Unix time since last reset (or init if no reset made)
-timer.interval_exceeded  # (bool) True if the contents of the loop take longer to execute than the current requested interval
-timer.target  # (float) unix time of the target time for the next loop
+## Background attributes and methods
+(mostly for development)
+```python
+timer.now()                 # Reference time used by all methods
+timer.start_time            # Ref. time corresponding to start/reset of timer
+timer.next_checkpt_release  # Ref. time at which next checkpt waittime is over
+timer.interval_exceeded     # (bool) True if loop contents take longer to execute than requested interval
 ```
 
 ## Notes
 
-- As mentioned previously, methods take effect immediately, even if the timer is in a waiting phase.
+- As mentioned previously, methods (and interval setting) take effect immediately, even if the timer is in a waiting phase.
 
-- A change in `interval` also takes effect immediately (any checkpt() that is in effect is bypassed), but does not reset the timer: in particular, `elapsed_time` is not reset to zero.
-
-- After calling `pause()`, the `checkpt()` command blocks until `resume()` is called, however in the current version after `stop()` the `checkpt()` becomes non-blocking (equivalent to a `pass`), so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again. This means that it is useful to pin the condition of the loop to the stopping of the timer (see examples above).
+- After calling `pause()`, the `checkpt()` command blocks until `resume()` is called, however in the current version after `stop()` the `checkpt()` becomes non-blocking (equivalent to a `pass`), so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again. This means that it is useful to pin the condition of the loop to the stopping of the timer (see examples).
 
 
 ## Accuracy test
@@ -277,10 +309,7 @@ Below are some quick preliminary results on timing accuracy in an Unix Environme
 
 ![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_windows_100ms.png)
 
-(**) corresponding graph:
-
-![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_windows_10ms.png)
-
+(**) Due to the large time fluctuations in Windows at this timescale, the use of the Timer is not really relevant anymore at theses interval values and lower. Work is under way to improve accuracy.
 
 ## Behavior when interval is exceeded
 
@@ -297,6 +326,8 @@ Install the package by cloning the GitHub repo (https://github.com/ovinc/oclock.
 pip install -e .
 ```
 
+## Testing
+
 Package requirements to run the tests:
 - pytest
 - numpy
@@ -307,16 +338,18 @@ pytest
 ```
 (**Note**: close the interactive countdown window at the end of the pytest run to finish the test.)
 
-Additional testing can be done by running the example file from the root of the repository.
+Additional testing of interactive command line for real-time timer control can be done by running the example file from the root of the repository.
 ```bash
 python -m example
 ```
 
-See *Accuracy Test* paragraph above to run performance tests for constant-duration loops with the `Timer` class.
+See also *Accuracy Test* paragraph above to run performance tests for constant-duration loops with the `Timer` class.
 
-Pull requests must be submitted on GitHub (https://github.com/ovinc/oclock) with commits (preferably squashed into a single commit) in branch *authors*.
+## Contributing
 
-Version number is automatically extracted from git tag using *setuptools_scm*.
+Issues and Pull requests must be submitted on GitHub (https://github.com/ovinc/oclock) with commits (preferably squashed into a single commit) in branch *authors*.
+
+Version number is automatically extracted from git tag using *setuptools_scm*. Git tags are added by the repo's maintainer.
 
 # Requirements
 
