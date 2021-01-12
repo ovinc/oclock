@@ -45,7 +45,7 @@ def constant_duration_loop(timer, q, fracmax=0.5, n=10):
     return np.array(ts), np.array(rs)
 
 
-def performance_test(dt, nloops, fmax, plot=False, warnings=False):
+def performance_test(dt, nloops, fmax, plot=False, warnings=False, precise=False):
     """Test accuracy of the constant-loop timing using random timing in loop.
 
     - dt is the requested total duration of the loop
@@ -53,8 +53,9 @@ def performance_test(dt, nloops, fmax, plot=False, warnings=False):
     - fmax is the max fraction of dt that can be taken by the random time.
     - plot: if True, show plot (matplotlib) of timing of all loops
     - warnings: if True, prints a warning when time interval too short
+    - precise: if True, increase time precision (useful for Windows)
     """
-    timer = Timer(interval=dt, warnings=warnings)
+    timer = Timer(interval=dt, warnings=warnings, precise=precise)
     q = Queue()
 
     print('Test Started')

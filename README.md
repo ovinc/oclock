@@ -179,13 +179,16 @@ print(data)
 
 ```python
 from oclock import Timer
-timer = Timer(interval=1, name='Timer', warnings=False)
+timer = Timer(interval=1, name='Timer', warnings=False, precise=False)
 ```
 
 Parameters:
 - `interval` (float): timer interval in seconds
 - `name` (str): optional name for description purposes (repr and warnings)
 - `warnings` (bool): If True, prints warning when time interval exceeded
+- `precise` (bool) if True, increase time precision (useful for Windows)
+
+*Note:* The `precise=True` option uses a custom `Event` class to replace `threading.Event`, originally written by Chris D. (see below).
 
 ## Methods
 
@@ -325,7 +328,9 @@ Python 3.x
 
 Olivier Vincent
 
-ovinc.py@gmail.com
+(ovinc.py@gmail.com)
+
+The custom `Event` class was written by Chris D. (https://stackoverflow.com/questions/48984512/making-a-timer-timeout-inaccuracy-of-threading-event-wait-python-3-6)
 
 
 # License

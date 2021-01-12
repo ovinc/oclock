@@ -2,22 +2,22 @@
 
 
 import time
-#from threading import Event
+import threading
 from .event import Event
-
 
 
 class Timer:
     """Timer that is cancellable and modifiable in real time."""
 
-    def __init__(self, interval=1, name='Timer', warnings=False):
+    def __init__(self, interval=1, name='Timer', warnings=False, precise=False):
         """Init oclock.Timer object.
 
         Parameters
         ----------
-        interval (float): timer interval in seconds
-        name (str): optional name for description purposes (repr and warnings)
-        warnings (bool): If True, prints warning when time interval exceeded
+        - interval (float): timer interval in seconds
+        - name (str): optional name for description purposes (repr and warnings)
+        - warnings (bool): If True, prints warning when time interval exceeded
+        - precise: if True, increase time precision (useful for Windows)
         """
         self._interval = interval
         self._interval_failed = False
@@ -26,9 +26,9 @@ class Timer:
         self.name = name
 
         # used to bypass waiting time when changes or stopping are required
-        self._bypass_checkpt = Event()
+        self._bypass_checkpt = Event() if precise else threading.Event()
         # used to wait for timer reactivation when in a paused state
-        self._unpause_event = Event()
+        self._unpause_event = Event() if precise else threading.Event()
 
         self._start()      # Timer starts automatically upon init
 

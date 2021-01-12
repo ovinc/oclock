@@ -12,6 +12,12 @@ def test_timer():
     assert round(data['mean dt (s)'], 2) == 0.05
 
 
+def test_timer_precise():
+    """Test Timer() class in precise mode (precision not tested here)"""
+    data = performance_test(dt=0.05, nloops=40, fmax=0.9, plot=False, precise=True)
+    assert round(data['mean dt (s)'], 2) == 0.05
+
+
 def test_parse():
     """Test parsing of time strings."""
     t1 = parse_time('::5')

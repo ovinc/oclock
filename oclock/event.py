@@ -1,4 +1,6 @@
-"""From https://stackoverflow.com/questions/48984512/making-a-timer-timeout-inaccuracy-of-threading-event-wait-python-3-6"""
+"""Taken without modification from Chris D. on StackOverflow:
+https://stackoverflow.com/questions/48984512/making-a-timer-timeout-inaccuracy-of-threading-event-wait-python-3-6
+"""
 
 import time
 import _thread
