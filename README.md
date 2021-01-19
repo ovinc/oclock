@@ -354,6 +354,12 @@ Python 3.x
 
 (Tests only made from python 3.5 to python 3.9 included)
 
+### Version-specific requirements
+
+| Version | Information  |
+|:-------:|:------------:|
+|  1.2.1  | Only Python 3.8+ (due to *importlib.metadata*). Later versions switch back to *importlib_metadata* instead. For this reason, this release is yanked from PyPI but can still be installed by specifying the version number exactly. Use v1.2.3 for greater python compatibility (3.5+). |
+
 # Author
 
 Olivier Vincent
