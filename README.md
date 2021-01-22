@@ -270,46 +270,21 @@ timer.interval_exceeded     # (bool) True if loop contents take longer to execut
 - After calling `pause()`, the `checkpt()` command blocks until `resume()` is called, however in the current version after `stop()` the `checkpt()` becomes non-blocking (equivalent to a `pass`), so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again. This means that it is useful to pin the condition of the loop to the stopping of the timer (see examples).
 
 
-## Accuracy test
+## Timer accuracy
 
-See *performance.py* file of the module for functions to test the accuracy of the timer. In particular:
+See *performance.py* file of the module for functions to test the behavior and accuracy of the timer. In particular:
 ```python
 from oclock.performance import performance_test
-performance_test(dt=0.1, nloops=1000, fmax=0.99)
+performance_test(dt=0.01, nloops=1000, fmax=0.99, plot=True, warnings=False, precise=True)
 ```
-tests the timing on 1000 loops of requested duration 0.1 second (100ms), using within the loop a function sleeping for a random amount of time between 0 and 0.99*dt (use `plot=True` option to see the results on a *matplotlib* graph, and `warnings=True` to have a printed warning when the execution time of the nested commands exceed the target duration of the loop).
+tests the timing on 1000 loops of requested duration 0.01 second (10ms), using within the loop a function sleeping for a random amount of time between 0 and 0.99 dt (with `plot=True` option to see the results on a *matplotlib* graph, and `warnings=False` to not have a printed warning when the execution time of the nested commands exceed the target duration of the loop); `precise=True` uses the timer in precise mode.
 
-Below are some quick preliminary results on timing accuracy in an Unix Environment (MacOS) and Windows, using `nloops=1000`, `fmax=0.5` for various values of `dt`. As can be seen, The Timer seems to perform well in Unix environments even down to millisecond intervals (1000fps), while it starts having difficulties below 40 ms intervals in Windows (25 fps).
+The *AccuracyTests.md* file gathers some accuracy results in Unix and Windows environments. In summary:
 
-### Unix (MacOS)
+- with **Unix**, time fluctuations are < 0.5 ms with the regular timer, and on the order of 0.01 ms (standard deviation) with the precise timer
 
-|         Requested `dt` (ms)        |  1000  | 100 (*) |   40    | 10 (**) |    1    |
-|:----------------------------------:|:------:|:-------:|:-------:|:-------:|:-------:|
-| average `dt` - requested `dt` (ms) | 0.0012 | 0.00012 | 0.00016 | 0.00005 | 0.00023 |
-| standard deviation in `dt` (ms)    | 0.48   | 0.36    |   0.31  |  0.23   | 0.08    |
+- with **Windows**, the regular timer fails quickly as frame rate is increased, due to fluctuations in the ~ 10 ms range. However the precise timer performs even better than in Unix, with fluctuations of less than 0.01 ms (standard deviation).
 
-(*) corresponding graph:
-
-![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_macos_100ms.png)
-
-(**) corresponding graph:
-
-![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_macos_10ms.png)
-
-
-### Windows
-
-|         Requested `dt` (ms)        | 1000  | 100 (*) |   40    | 10 (**) |  1  |
-|:----------------------------------:|:-----:|:-------:|:-------:|:-------:|:---:|
-| average `dt` - requested `dt` (ms) | 0.014 | 0.0015  | 0.0013  |  1.2    | 1.1 |
-| standard deviation in `dt` (ms)    | 7.0   | 7.1     |  7.0    |  5.6    | 1.9 |
-
-
-(*) corresponding graph:
-
-![](https://raw.githubusercontent.com/ovinc/oclock/master/media/img/timer_windows_100ms.png)
-
-(**) Due to the large time fluctuations in Windows at this timescale, the use of the Timer is not really relevant anymore at theses interval values and lower. Work is under way to improve accuracy.
 
 ## Behavior when interval is exceeded
 
