@@ -12,6 +12,7 @@ The timing (interval) and execution (pause/stop etc.) can be modified in real ti
 
 ### Other tools
 
+- `Event`: class mimicking `threading.Event()` but with much better sleeping time accuracy.
 - `Countdown`: a class that starts a GUI countdown timer.
 - `parse_time()` function: returns a `datetime.timedelta` from a time string (e.g. `':2:25'`).
 - `measure_time()` and `measure_duration()` functions: are context managers for measuring time and execution times / time uncertainty of encapsulated commands.
@@ -129,6 +130,23 @@ timer.total_time  # sum of the two other times
 ### Details
 
 See *Timer Class details* section below for all methods, properties and attributes and the *Development* section below for accuracy information.
+
+
+## Event class
+
+The `oclock.Event` class mimicks `threading.Event` (https://docs.python.org/3/library/threading.html#event-objects) but provides much better sleep time accuracy.
+
+Available methods are the same as for `threading.Event`:
+- `set()`
+- `clear()`
+- `is_set()`
+- `wait()`
+
+
+Below are comments from Chris D. who originally posted the code for this class on StackOverflow (see *Contributors* at the end of this file):
+
+> Internally, it uses a combination of a time.sleep() loop and a busy loop for greatly increased precision. The sleep loop runs in a separate thread so that the blocking wait() call in the main thread can still be immediately interrupted. When the set() method is called, the sleep thread should terminate shortly afterwards. Also, in order to minimize CPU utilization, I made sure that the busy loop will never run for more than 3 milliseconds.
+
 
 ## Countdown GUI
 
@@ -332,11 +350,6 @@ Python 3.x
 
 (Tests only made from python 3.5 to python 3.9 included)
 
-### Version-specific requirements
-
-| Version | Information  |
-|:-------:|:------------:|
-|  1.2.1  | Only Python 3.8+ (due to *importlib.metadata*). Later versions switch back to *importlib_metadata* instead. For this reason, this release is yanked from PyPI but can still be installed by specifying the version number exactly. Use v1.2.3 for greater python compatibility (3.5+). |
 
 # Author
 
@@ -344,9 +357,13 @@ Olivier Vincent
 
 (ovinc.py@gmail.com)
 
-The custom `Event` class was written by Chris D. (https://stackoverflow.com/questions/48984512/making-a-timer-timeout-inaccuracy-of-threading-event-wait-python-3-6)
+# Contributors
+
+The `oclock.Event` class was originally written by Chris D.
+
+(https://stackoverflow.com/questions/48984512/making-a-timer-timeout-inaccuracy-of-threading-event-wait-python-3-6)
 
 
 # License
 
-BSD 3-Clause (see *LICENCE* file).
+GNU GPLv3, see *LICENSE* file

@@ -1,6 +1,30 @@
-"""Taken without modification from Chris D. on StackOverflow:
+"""Custom class mimicking threading Event, but with better timing accuracy.
+
+Originally written by Chris D. and posted on StackOverflow:
 https://stackoverflow.com/questions/48984512/making-a-timer-timeout-inaccuracy-of-threading-event-wait-python-3-6
-"""
+
+The olock package is licensed under GNU GPLv3 that is compatible with
+StackOverflow's CC BY-SA 4.0 license."""
+
+# ----------------------------- License information --------------------------
+
+# This file is part of the oclock python package.
+# Copyright (C) 2021 Olivier Vincent
+
+# The oclock package is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# The oclock package is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with the oclock python package.
+# If not, see <https://www.gnu.org/licenses/>
+
 
 import time
 import _thread

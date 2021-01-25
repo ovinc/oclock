@@ -2,3 +2,4 @@ include *.py
 include *.ipynb
 recursive-include tests *.py
 recursive-include media *
+include *.md

@@ -1,6 +1,8 @@
 """Test oclock module with pytest"""
 
-import time, threading, random
+import time
+import threading
+import random
 
 from oclock.performance import performance_test
 from oclock import Timer, Countdown, loop
