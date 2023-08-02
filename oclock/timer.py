@@ -176,10 +176,14 @@ class Timer:
     @interval.setter
     def interval(self, value):
         """Modify existing interval to a new value, effective immediately."""
+        self.set_interval(immediate=True)
+
+    def set_interval(self, value, immediate=True):
+        """Choose if interval change is effective immediately or at next checkpt"""
         if value < 0:
             raise ValueError('Timer interval must be positive')
-        else:
-            self._interval = value
+        self._interval = value
+        if immediate:
             self._target = self.now() + value
             self._bypass_checkpt.set()
 

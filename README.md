@@ -247,6 +247,10 @@ timer.resume()   # Restart the elapsed time counter and unlock checkpt()
 
 timer.stop()     # Stop counting time and exit checkpt()
 timer.reset()    # Stop and restart timer immediately
+
+# Change timer interval
+timer.set_interval(...)  # immediately, equivalent to timer.interval = ...
+timer.set_interval(..., immediate=False)   # wait next checkpt
 ```
 
 ## Properties (settable)
@@ -283,7 +287,7 @@ timer.interval_exceeded     # (bool) True if loop contents take longer to execut
 
 ## Notes
 
-- As mentioned previously, methods (and interval setting) take effect immediately, even if the timer is in a waiting phase.
+- As mentioned previously, methods (and interval setting) take effect immediately, even if the timer is in a waiting phase. It is however possible to wait for the next checkpt to apply a new timer interval, by using the `immediate=False` option in `set_interval()` (see example in the *Examples.ipynb* notebook).
 
 - After calling `pause()`, the `checkpt()` command blocks until `resume()` is called, however in the current version after `stop()` the `checkpt()` becomes non-blocking (equivalent to a `pass`), so that all following lines will be executed immediately and without any waiting time (i.e. as fast as possible if within a loop), until `timer.reset()` is called again. This means that it is useful to pin the condition of the loop to the stopping of the timer (see examples).
 
