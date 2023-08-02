@@ -176,7 +176,7 @@ class Timer:
     @interval.setter
     def interval(self, value):
         """Modify existing interval to a new value, effective immediately."""
-        self.set_interval(immediate=True)
+        self.set_interval(value, immediate=True)
 
     def set_interval(self, value, immediate=True):
         """Choose if interval change is effective immediately or at next checkpt"""
