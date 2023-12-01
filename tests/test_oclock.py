@@ -6,7 +6,7 @@ import random
 
 from oclock.performance import performance_test
 from oclock import Timer, Countdown, loop
-from oclock import parse_time, measure_time, measure_duration
+from oclock import parse_time, measure_time, measure_duration, after
 
 
 def test_timer():
@@ -78,6 +78,15 @@ def test_measure_duration():
     with measure_duration() as duration:
         time.sleep(1)
     assert round(duration['duration (s)'], 1) == 1
+
+
+def test_after():
+    """Test after() function"""
+    def my_function():
+        print('Hello')
+        return 3.14
+    result = after('::1', my_function)
+    assert result == 3.14
 
 
 def test_countdown():

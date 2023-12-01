@@ -23,10 +23,11 @@
 import time
 from datetime import timedelta
 from contextlib import contextmanager
+from threading import Thread
 
 
 def parse_time(time_str):
-    """Transforms inputs in the form h:m:s in a h, m, s tuple.
+    """Transforms inputs in the form h:m:s into a timedelta.
 
     Input
     -----
@@ -132,3 +133,33 @@ def measure_duration():
     finally:
         t2 = time.perf_counter()
         duration['duration (s)'] = t2 - t1
+
+
+def after(duration=':::', function=None, args=None, kwargs=None, blocking=True):
+    """Execute function after given waiting time
+
+    Input
+    -----
+    - duration: time to wait in a format h:m:s (see oclock.parse_time())
+    - function: function to execute
+    - args: arguments to pass to the function (tuple)
+    - kwargs: keyword arguments to pass to the function (dict)
+    - blocking: if True (default), blocks console until function executed.
+
+    Output
+    ------
+    - if blocking: returns result of function
+    - if non-blocking: returns None
+    """
+    wait_time = parse_time(duration).total_seconds()
+    args = () if args is None else args
+    kwargs = {} if kwargs is None else kwargs
+
+    def exec_func():
+        time.sleep(wait_time)
+        return function(*args, **kwargs)
+
+    if blocking:
+        return exec_func()
+    else:
+        Thread(target=exec_func).start()

@@ -16,6 +16,7 @@ The timing (interval) and execution (pause/stop etc.) can be modified in real ti
 - `Countdown`: a class that starts a GUI countdown timer.
 - `parse_time()` function: returns a `datetime.timedelta` from a time string (e.g. `':2:25'`).
 - `measure_time()` and `measure_duration()` functions: are context managers for measuring time and execution times / time uncertainty of encapsulated commands.
+- `after()` allows the user to run a function after a pre-defined waiting time.
 - Note that the `Timer` class can also be used as a regular chronometer with its methods `pause()`, `resume()`, `stop()` etc.
 
 # Quick start
@@ -217,6 +218,23 @@ print(data)
 # Out: {'measurement': 3.618,
 #       'time (unix)': 1604780958.0705943,
 #       'dt (s)': 0.6218999624252319}
+```
+
+
+## Execute function after waiting time
+
+```python
+from oclock import after
+
+def my_function():
+    print('Hello')
+    return 3.14
+
+after('::2', my_function)
+
+# Note: there are options to pass args/kwargs to function
+#       and also to not block console during waiting.
+#       (see docstring of after() function)
 ```
 
 
