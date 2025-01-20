@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oclock"
+authors = [
+    {name = "Olivier Vincent", email = "ovinc.py@gmail.com"},
+]
+description = " Tools for timed, no-drift loops of constant duration, and other misc. timing tools (GUI countdown, context managers etc.)"
+readme = "README.md"
+requires-python = ">=3.5"
+keywords = [
+    "timing",
+    "loops",
+    "constant duration",
+    "cancellable",
+    "modifiable",
+    "countdown",
+    "context manager",
+    "gui",
+]
+license = {text = "GNU GPLv3"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
+dependencies = [
+    "importlib-metadata",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/ovinc/oclock"
+Documentation = "https://github.com/ovinc/oclock/README.md"
+Repository = "https://github.com/ovinc/oclock.git"
+
+[tool.setuptools.packages.find]
+exclude = ["media",]
+
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools-scm

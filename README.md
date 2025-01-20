@@ -368,10 +368,7 @@ Version number is automatically extracted from git tag using *setuptools_scm*. G
 
 # Requirements
 
-Python 3.x
-
-(Tests only made from python 3.5 to python 3.9 included)
-
+Python >= 3.5
 
 # Author
 
