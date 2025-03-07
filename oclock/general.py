@@ -26,71 +26,103 @@ from contextlib import contextmanager
 from threading import Thread
 
 
+def _convert_str(s, kind=''):
+    """Convert individual str of hours, minutes or seconds to float.
+
+    Used by parse_time
+    kind is only for documenting the error message;
+    should be 'hours', 'minutes' or 'seconds'.
+    """
+    if s == '':  # no value indicated, interpreted as zero
+        return 0
+    try:
+        val = float(s)
+    except ValueError:
+        raise ValueError(f'{s} not a valid value for {kind}.')
+    else:
+        return val
+
+
 def parse_time(time_str):
     """Transforms inputs in the form h:m:s into a timedelta.
 
-    Input
-    -----
-    time_str: str (e.g. ::5 for 5 seconds or 1:30: for 1.5 hours)
-    (see examples below)
+    Parameters
+    ----------
+    time_str : str
+        Input duration value, e.g. ::5 for 5 seconds or 1:30: for 1.5 hours
+        NOTE: if decimal numbers are used, they will all be summed up, e.g.
+        parse_time(:1.5:30) yields a duration of 2 minutes.
 
-    Output
-    ------
-    datetime.timedelta object
+    Returns
+    -------
+    datetime.timedelta
 
     Examples
     --------
-    '3:14:16'   --> 3 hours, 14 minutes, 16 seconds
-    '1:45:00'   --> 1 hour 45 minutes
-    '1:45:'     --> 1 hour 45 minutes
-    '00:02:00'  --> 2 minutes
-    ':2:'       --> 2 minutes
-    '00:00:05'  --> 5 seconds
-    '::5'       --> 5 seconds
+    >>> parse_time('3:14:16')    # 3 hours, 14 minutes, 16 seconds
+    datetime.timedelta(seconds=11656)
+
+    >>> parse_time('1:45:00')    # 1 hour 45 minutes
+    datetime.timedelta(seconds=6300)
+
+    >>> parse_time('1:45:')      # 1 hour 45 minutes
+    datetime.timedelta(seconds=6300)
+
+    >>> parse_time('1.75::')     # 1 hour 45 minutes
+    datetime.timedelta(seconds=6300)
+
+    >>> parse_time('00:02:00')   # 2 minutes
+    datetime.timedelta(seconds=6300)
+
+    >>> parse_time(':2:')        # 2 minutes
+    datetime.timedelta(seconds=120)
+
+    >>> parse_time('00:00:05')   # 5 seconds
+    datetime.timedelta(seconds=120)
+
+    >>> parse_time('::5')        # 5 seconds
+    datetime.timedelta(seconds=120)
+
+    >>> parse_time('::0.04')     # 40 milliseconds
+    datetime.timedelta(microseconds=40000)
     """
-    timestr = time_str.split(':')
-    tint = []
+    try:
+        hours_str, minutes_str, seconds_str = time_str.split(':')
+    except ValueError:
+        raise ValueError(f'{time_str} no a valid format of the form h:m:s')
 
-    for tstr in timestr:
-        try:
-            t = int(tstr)
-        except ValueError:
-            t = 0
-        tint.append(t)
+    hours = _convert_str(hours_str, kind='hours')
+    minutes = _convert_str(minutes_str, kind='minutes')
+    seconds = _convert_str(seconds_str, kind='seconds')
 
-    h, m, s = tint
-    duration = timedelta(hours=h, minutes=m, seconds=s)
-    return duration
+    return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
 
 @contextmanager
 def measure_time():
     """Measure mean unix time (s) and time uncertainty (s) of encapsulated commands.
 
-    Output
-    ------
-    Dictionary with keys:
-        - 'time (unix)': (tmax + tmin) / 2
-        - 'dt (s)': (tmax - tmin) / 2
+    Returns
+    -------
+    dict
+        Dictionary with keys:
+            - 'time (unix)': (tmax + tmin) / 2
+            - 'dt (s)': (tmax - tmin) / 2
 
-    where tmin, tmax are the unix times before the instructions and after the
-    instructions, respectively.
+        where tmin, tmax are the unix times before the instructions and after
+        the instructions, respectively.
 
     Examples
     --------
     >>> with measure_time() as timing:
-            my_function()
-        print(timing)
-
-    Out:
+    >>>     my_function()
+    >>> print(timing)
     {'time (unix)': 1604780958.0705943, 'dt (s)': 0.6218999624252319}
 
     >>> with measure_time() as data:
-            measurement = my_function()  # returns e.g. 3.618
-            data['measurement'] = measurement
-        print(data)
-
-    Out:
+    >>>     measurement = my_function()  # returns e.g. 3.618
+    >>>     data['measurement'] = measurement
+    >>> print(data)
     {'measurement': 3.618,
      'time (unix)': 1604780958.0705943,
      'dt (s)': 0.6218999624252319}
@@ -113,17 +145,16 @@ def measure_time():
 def measure_duration():
     """Measure duration (s) of encapsulated commands.
 
-    Output
-    ------
-    Dict with total duration in seconds (key 'duration (s)')
-
-    Example
+    Returns
     -------
-    >>> with measure_duration() as duration:
-            my_function()
-        print(duration)
+    dict
+        Dictionary with total duration in seconds (key 'duration (s)')
 
-    Out:
+    Examples
+    --------
+    >>> with measure_duration() as duration:
+    >>>     my_function()
+    >>> print(duration)
     {'duration (s)': 0.9871297000004233}
     """
     duration = {}
@@ -138,18 +169,30 @@ def measure_duration():
 def after(duration=':::', function=None, args=None, kwargs=None, blocking=True):
     """Execute function after given waiting time
 
-    Input
-    -----
-    - duration: time to wait in a format h:m:s (see oclock.parse_time())
-    - function: function to execute
-    - args: arguments to pass to the function (tuple)
-    - kwargs: keyword arguments to pass to the function (dict)
-    - blocking: if True (default), blocks console until function executed.
+    Parameters
+    ----------
+    duration : str
+        time to wait in a format h:m:s (see oclock.parse_time())
 
-    Output
-    ------
-    - if blocking: returns result of function
-    - if non-blocking: returns None
+    function : callable
+        function or method to execute (e.g. device.on)
+        NOTE: do not include parentheses or the function will be executed
+              immediately
+
+    args : tuple
+        arguments to pass to the function
+
+    kwargs : dict
+        keyword arguments to pass to the function
+
+    blocking : bool
+        if True (default), blocks console until function executed
+
+    Returns
+    -------
+    None or Any
+        - if blocking: returns result of function
+        - if non-blocking: returns None
     """
     wait_time = parse_time(duration).total_seconds()
     args = () if args is None else args

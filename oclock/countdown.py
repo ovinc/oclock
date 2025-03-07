@@ -60,10 +60,12 @@ class Countdown:
     def __init__(self, time_str):
         """Init of a Countdown object.
 
-        Input
-        -----
-        time_str: str (e.g. ::5 for 5 seconds, or 1:30: for 1.5 hours)
-        (see oclock.parse_time() for details)
+        Parameters
+        ----------
+        time_str : str
+            time to count, in h:m:s format
+            (e.g. ::5 for 5 seconds, or 1:30: for 1.5 hours)
+            see oclock.parse_time() for details.
         """
         self.total_time = parse_time(time_str)   # timedelta
         self.timer = Timer(interval=0.2)     # check remaining time every 0.2s

@@ -97,7 +97,7 @@ def loop(timer):
 
     Parameters
     ----------
-    - timer: oclock.Timer object
+    timer : oclock.Timer object
     """
     def decorator(function):
         @wraps(function)

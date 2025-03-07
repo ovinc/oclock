@@ -1,6 +1,8 @@
 # About
 
-**oclock** is a Python 3 package. Its main goal is to provide a simple way to create timed loops with constant time intervals and no drift. It also provides various other timing tools and a GUI time.
+**oclock** is a Python 3 package.
+Its main goal is to provide a simple way to create timed loops with constant time intervals and no drift.
+It also provides various other timing tools and a GUI timer.
 
 ### Timed loops
 
@@ -14,7 +16,7 @@ The timing (interval) and execution (pause/stop etc.) can be modified in real ti
 
 - `Event`: class mimicking `threading.Event()` but with much better sleeping time accuracy.
 - `Countdown`: a class that starts a GUI countdown timer.
-- `parse_time()` function: returns a `datetime.timedelta` from a time string (e.g. `':2:25'`).
+- `parse_time()` function: returns a `datetime.timedelta` from a time string (e.g. `':2:25'` for 2 minutes and 25 seconds).
 - `measure_time()` and `measure_duration()` functions: are context managers for measuring time and execution times / time uncertainty of encapsulated commands.
 - `after()` allows the user to run a function after a pre-defined waiting time.
 - Note that the `Timer` class can also be used as a regular chronometer with its methods `pause()`, `resume()`, `stop()` etc.
@@ -174,13 +176,22 @@ Countdown('1:45:')         # start timer of duration 1 hour 45 minutes
 
 When countdown is finished, 'Done' is displayed for 5 seconds in the GUI while the console displays *Countdown finished* and emits a sound. Then the time passed since the end of countdown is displayed as a negative value in red. The program stops when the GUI window is closed.
 
+
 ## Parse time function
 
-The `parse_time()` function is used in the argument parsing of the countdown GUI from a terminal (see above). It transforms a string in the form `'h:m:s'` into a `datetime.timedelta` object. Inputs of the form e.g. `'::5'` or `:2:`, `'3:30:'` are acceptable for 5 seconds, 2 minutes, and 3.5 hours, respectively.
+The `parse_time()` function transforms a string in the form `'h:m:s'` into a `datetime.timedelta` object.
+It is thus a duration parsing function.
+It is used e.g in the argument parsing of the countdown GUI from a terminal (see above).
+
+Inputs of the form `'::5'` or `:2:`, `'3:30:'` are acceptable for 5 seconds, 2 minutes, and 3.5 hours, respectively.
 ```python
 >>> parse_time(':2:30')
 datetime.timedelta(seconds=150)
 ```
+See more examples in the help (docstring) of the function.
+
+**NOTE**: if decimal numbers are used, they will all be summed up, e.g. `parse_time(:1.5:30)` yields a duration of 2 minutes.
+
 
 ## Context managers to record timing of commands
 

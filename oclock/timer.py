@@ -33,10 +33,21 @@ class Timer:
 
         Parameters
         ----------
-        - interval (float): timer interval in seconds
-        - name (str): optional name for description purposes (repr and warnings)
-        - warnings (bool): If True, prints warning when time interval exceeded
-        - precise: if True, increase time precision (useful for Windows)
+        interval : int or float
+            timer interval in seconds
+            (default 1)
+
+        name : str
+            optional name for description purposes (repr and warnings)
+            (default 'Timer')
+
+        warnings : bool
+            If True, prints warning when time interval exceeded
+            (default False)
+
+        precise : bool
+            if True, increase time precision ; useful for Windows
+            (default False)
         """
         self._interval = interval
         self._interval_failed = False
