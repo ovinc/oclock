@@ -25,17 +25,13 @@ StackOverflow's CC BY-SA 4.0 license."""
 # along with the oclock python package.
 # If not, see <https://www.gnu.org/licenses/>
 
-
 import time
 import _thread
 import datetime
 
 
 class Event:
-    __slots__ = (
-        "_flag", "_lock", "_nl",
-        "_pc", "_waiters"
-    )
+    __slots__ = ("_flag", "_lock", "_nl", "_pc", "_waiters")
 
     _lock_type = _thread.LockType
     _timedelta = datetime.timedelta
@@ -74,10 +70,7 @@ class Event:
 
             waiters.clear()
 
-    def wait(
-        self,
-        timeout: float = None
-    ) -> bool:
+    def wait(self, timeout: float = None) -> bool:
         with self._lock:
             return self._wait(self._pc(), timeout)
 
@@ -96,7 +89,7 @@ class Event:
         end: _timedelta = None,
         waiter: _lock_type = None,
         new_thread=_thread.start_new_thread,
-        thread_delay=_timedelta(milliseconds=3)
+        thread_delay=_timedelta(milliseconds=3),
     ) -> bool:
         flag = self._flag
 
@@ -113,10 +106,7 @@ class Event:
             if delay > thread_delay:
                 mark = end - thread_delay
                 waiter = self._new_waiter()
-                new_thread(
-                    self._wait_thread,
-                    (flag, mark, waiter)
-                )
+                new_thread(self._wait_thread, (flag, mark, waiter))
 
         lock = self._lock
         lock.release()
@@ -126,10 +116,7 @@ class Event:
                 waiter.acquire()
 
             if end:
-                while (
-                    not flag and
-                    td(seconds=pc()) < end
-                ):
+                while not flag and td(seconds=pc()) < end:
                     pass
 
         finally:
@@ -147,7 +134,7 @@ class Event:
         waiter: _lock_type,
         td=_timedelta,
         pc=_perf_counter,
-        sleep=time.sleep
+        sleep=time.sleep,
     ):
         while not flag and td(seconds=pc()) < mark:
             sleep(0.001)
@@ -167,28 +154,19 @@ class Event:
 
 
 if __name__ == "__main__":
+
     def test_wait_time():
         wait_time = datetime.timedelta(microseconds=1)
         wait_time = wait_time.total_seconds()
 
-        def test(
-            event=Event(),
-            delay=wait_time,
-            pc=time.perf_counter
-        ):
+        def test(event=Event(), delay=wait_time, pc=time.perf_counter):
             pc1 = pc()
             event.wait(delay)
             pc2 = pc()
-            pc1, pc2 = [
-                int(nbr * 1000000000)
-                for nbr in (pc1, pc2)
-            ]
+            pc1, pc2 = [int(nbr * 1000000000) for nbr in (pc1, pc2)]
             return pc2 - pc1
 
-        lst = [
-            f"{i}.\t\t{test()}"
-            for i in range(1, 11)
-        ]
+        lst = [f"{i}.\t\t{test()}" for i in range(1, 11)]
         print("\n".join(lst))
 
     test_wait_time()

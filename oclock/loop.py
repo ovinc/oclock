@@ -19,7 +19,6 @@
 # along with the oclock python package.
 # If not, see <https://www.gnu.org/licenses/>
 
-
 from threading import Thread
 from functools import wraps
 
@@ -41,15 +40,17 @@ def cli(timer):
     - 't' or 'time': print timing (interval, elapsed time, etc.) info
     - 'q', 'Q', 'quit' or 'stop': stop timer and exit
     """
-    msg = '-----------------------------------------------------------------\n'\
-          'Timer Command-Line-Interface. Possible inputs:\n' \
-          '- any number (int/float): change timer interval to that new value\n' \
-          "- 'p' or 'pause': pause timer\n" \
-          "- 'r' or 'resume': resume timer\n" \
-          "- 'R' or 'reset': reset timer\n" \
-          "- 't' or 'time': print timing (interval, elapsed time, etc.) info\n"\
-          "- 'q', 'Q', 'quit' or 'stop': stop timer and exit\n" \
-          '-----------------------------------------------------------------\n'
+    msg = (
+        "-----------------------------------------------------------------\n"
+        "Timer Command-Line-Interface. Possible inputs:\n"
+        "- any number (int/float): change timer interval to that new value\n"
+        "- 'p' or 'pause': pause timer\n"
+        "- 'r' or 'resume': resume timer\n"
+        "- 'R' or 'reset': reset timer\n"
+        "- 't' or 'time': print timing (interval, elapsed time, etc.) info\n"
+        "- 'q', 'Q', 'quit' or 'stop': stop timer and exit\n"
+        "-----------------------------------------------------------------\n"
+    )
     print(msg)
 
     while not timer.is_stopped:
@@ -57,24 +58,26 @@ def cli(timer):
         try:
             dt = float(a)
         except ValueError:
-            if a in ('p', 'pause'):
-                print('--- Timer Paused')
+            if a in ("p", "pause"):
+                print("--- Timer Paused")
                 timer.pause()
-            elif a in ('r', 'resume'):
-                print('--- Timer Resumed')
+            elif a in ("r", "resume"):
+                print("--- Timer Resumed")
                 timer.resume()
-            elif a in ('R', 'reset'):
-                print('--- Timer Restarted')
+            elif a in ("R", "reset"):
+                print("--- Timer Restarted")
                 timer.reset()
-            elif a in ('t', 'time'):
+            elif a in ("t", "time"):
                 elapsed = timer.elapsed_time
                 paused = timer.pause_time
                 dt = timer.interval
                 tnext = timer.next_checkpt_release - timer.now()
-                print("[Interval {:.3f}] [Elapsed: {:.3f}] [Paused {:.3f}] "
-                      "[Next {:.3f}]".format(dt, elapsed, paused, tnext))
-            elif a in ('q', 'Q', 'quit', 'stop'):
-                print('--- Timer Stopped')
+                print(
+                    "[Interval {:.3f}] [Elapsed: {:.3f}] [Paused {:.3f}] "
+                    "[Next {:.3f}]".format(dt, elapsed, paused, tnext)
+                )
+            elif a in ("q", "Q", "quit", "stop"):
+                print("--- Timer Stopped")
                 timer.stop()
             else:
                 pass
@@ -82,11 +85,11 @@ def cli(timer):
             try:
                 timer.interval = dt
             except ValueError:
-                print('--- Invalid Interval')
+                print("--- Invalid Interval")
             else:
-                print('--- Interval (s) changed to {}'.format(dt))
+                print("--- Interval (s) changed to {}".format(dt))
 
-    print('--- Loop Exited')
+    print("--- Loop Exited")
 
 
 # ========== Decorators to repeat function periodically using Timer ==========
@@ -99,13 +102,16 @@ def loop(timer):
     ----------
     timer : oclock.Timer object
     """
+
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
             while not timer.is_stopped:
                 timer.checkpt()
                 function(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -116,6 +122,7 @@ def interactiveloop(**timer_kwargs):
     ----------
     any argument or keyword-argument taken by oclock.Timer(), e.g. 'interval'
     """
+
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
@@ -125,5 +132,7 @@ def interactiveloop(**timer_kwargs):
             while not timer.is_stopped:
                 function(*args, **kwargs)
                 timer.checkpt()
+
         return wrapper
+
     return decorator

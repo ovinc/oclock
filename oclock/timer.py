@@ -19,7 +19,6 @@
 # along with the oclock python package.
 # If not, see <https://www.gnu.org/licenses/>
 
-
 import time
 import threading
 from .event import Event
@@ -28,7 +27,7 @@ from .event import Event
 class Timer:
     """Timer that is cancellable and modifiable in real time."""
 
-    def __init__(self, interval=1, name='Timer', warnings=False, precise=False):
+    def __init__(self, interval=1, name="Timer", warnings=False, precise=False):
         """Init oclock.Timer object.
 
         Parameters
@@ -60,13 +59,14 @@ class Timer:
         # used to wait for timer reactivation when in a paused state
         self._unpause_event = Event() if precise else threading.Event()
 
-        self._start()      # Timer starts automatically upon init
+        self._start()  # Timer starts automatically upon init
 
     def __repr__(self):
         """Str representation of Timer object"""
-        warning = 'ON' if self.warnings else 'OFF'
-        s = "{}, name '{}', interval {}s, warnings {}" \
-            .format(self.__class__, self.name, self.interval, warning)
+        warning = "ON" if self.warnings else "OFF"
+        s = "{}, name '{}', interval {}s, warnings {}".format(
+            self.__class__, self.name, self.interval, warning
+        )
         return s
 
     def _start(self):
@@ -91,7 +91,7 @@ class Timer:
         """Stop timer immediately."""
         if self.is_paused:
             self.resume()
-        self._unpause_event.set()      # in case stop is called in a paused state
+        self._unpause_event.set()  # in case stop is called in a paused state
         self._bypass_checkpt.set()  # cancel any remaining wait at the checkpt
         self.stop_time = self.now()
         self.is_stopped = True
@@ -117,7 +117,6 @@ class Timer:
         """Waits at current point in program to keep the interval constant."""
 
         if self.is_paused:  # if timer is paused, wait for reactivation by resume()
-
             self._unpause_event.wait()
 
             # The two lines below (target adjustment and else statement) make
@@ -126,16 +125,17 @@ class Timer:
             self._target = self.now() + self._interval
 
         else:
-
             if not self.interval_exceeded:
-
                 # if time before the previous checkpt has not exceeded the
                 # required interval, set target to another multiple of dt
 
                 if self.warnings and self._interval_failed:
                     # only called when interval is ok again after having failed
-                    print("--- Time interval ({}s) OK again for {}"
-                          .format(self.interval, self.name))
+                    print(
+                        "--- Time interval ({}s) OK again for {}".format(
+                            self.interval, self.name
+                        )
+                    )
                 self._interval_failed = False
 
                 w = self._target - self.now()
@@ -143,14 +143,16 @@ class Timer:
                 self._bypass_checkpt.wait(w)
 
             else:
-
                 # if already passed target, move on immediately and set target
                 # at a time dt from current time to try again.
 
                 if self.warnings and not self._interval_failed:
                     # only called when interval fails right after being ok
-                    print("--- Warning, time interval ({}s) too short for {}"
-                          .format(self.interval, self.name))
+                    print(
+                        "--- Warning, time interval ({}s) too short for {}".format(
+                            self.interval, self.name
+                        )
+                    )
                 self._interval_failed = True
 
                 self._target = self.now() + self.interval
@@ -192,7 +194,7 @@ class Timer:
     def set_interval(self, value, immediate=True):
         """Choose if interval change is effective immediately or at next checkpt"""
         if value < 0:
-            raise ValueError('Timer interval must be positive')
+            raise ValueError("Timer interval must be positive")
         self._interval = value
         if immediate:
             self._target = self.now() + value

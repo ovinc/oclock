@@ -19,7 +19,6 @@
 # along with the oclock python package.
 # If not, see <https://www.gnu.org/licenses/>
 
-
 from .timer import Timer
 from .countdown import Countdown
 from .general import parse_time, measure_time, measure_duration, after
@@ -29,6 +28,6 @@ from .event import Event
 # from importlib.metadata import version (only for python 3.8+)
 from importlib_metadata import version
 
-__version__ = version('oclock')
-__author__ = 'Olivier Vincent'
-__license__ = 'GNU GPLv3'
+__version__ = version("oclock")
+__author__ = "Olivier Vincent"
+__license__ = "GNU GPLv3"

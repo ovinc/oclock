@@ -19,26 +19,25 @@
 # along with the oclock python package.
 # If not, see <https://www.gnu.org/licenses/>
 
-
 import time
 from datetime import timedelta
 from contextlib import contextmanager
 from threading import Thread
 
 
-def _convert_str(s, kind=''):
+def _convert_str(s, kind=""):
     """Convert individual str of hours, minutes or seconds to float.
 
     Used by parse_time
     kind is only for documenting the error message;
     should be 'hours', 'minutes' or 'seconds'.
     """
-    if s == '':  # no value indicated, interpreted as zero
+    if s == "":  # no value indicated, interpreted as zero
         return 0
     try:
         val = float(s)
     except ValueError:
-        raise ValueError(f'{s} not a valid value for {kind}.')
+        raise ValueError(f"{s} not a valid value for {kind}.")
     else:
         return val
 
@@ -87,13 +86,13 @@ def parse_time(time_str):
     datetime.timedelta(microseconds=40000)
     """
     try:
-        hours_str, minutes_str, seconds_str = time_str.split(':')
+        hours_str, minutes_str, seconds_str = time_str.split(":")
     except ValueError:
-        raise ValueError(f'{time_str} no a valid format of the form h:m:s')
+        raise ValueError(f"{time_str} no a valid format of the form h:m:s")
 
-    hours = _convert_str(hours_str, kind='hours')
-    minutes = _convert_str(minutes_str, kind='minutes')
-    seconds = _convert_str(seconds_str, kind='seconds')
+    hours = _convert_str(hours_str, kind="hours")
+    minutes = _convert_str(minutes_str, kind="minutes")
+    seconds = _convert_str(seconds_str, kind="seconds")
 
     return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
@@ -137,8 +136,8 @@ def measure_time():
         t2p = time.perf_counter()
         dt = (t2p - t1p) / 2
         t = (t1 + t2) / 2
-        timing['time (unix)'] = t
-        timing['dt (s)'] = dt
+        timing["time (unix)"] = t
+        timing["dt (s)"] = dt
 
 
 @contextmanager
@@ -163,10 +162,10 @@ def measure_duration():
         yield duration
     finally:
         t2 = time.perf_counter()
-        duration['duration (s)'] = t2 - t1
+        duration["duration (s)"] = t2 - t1
 
 
-def after(duration=':::', function=None, args=None, kwargs=None, blocking=True):
+def after(duration=":::", function=None, args=None, kwargs=None, blocking=True):
     """Execute function after given waiting time
 
     Parameters
