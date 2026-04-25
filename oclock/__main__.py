@@ -24,16 +24,29 @@ import argparse
 from .countdown import Countdown
 
 
-descr = "GUI countdown clock based on the oclock module."
-
-parser = argparse.ArgumentParser(
-    description=descr, formatter_class=argparse.RawTextHelpFormatter
+description = (
+    "GUI countdown clock based on the oclock module.\n\n"
+    "Examples\n"
+    "--------\n"
+    "Timer for 5 seconds:\n"
+    ">>> python -m oclock ::5\n\n"
+    "Timer for 1 hour and 25 minutes:\n"
+    ">>> python -m oclock 1:25:\n"
 )
 
-msg = "Input time in hh:mm:ss format, e.g. 10:30:00, or ::5 (5 seconds)"
+parser = argparse.ArgumentParser(
+    description=description,
+    formatter_class=argparse.RawTextHelpFormatter,
+    prog='python -m oclock',
+)
 
-# The nargs='?' is to have a positional argument with a default value
-parser.add_argument("time", type=str, nargs="?", help=msg)
+msg = (
+    "Duration in hh:mm:ss format, e.g. "
+    "1:25:30 (1 hour, 25 min and 30 seconds), "
+    "or ::5 (5 seconds)."
+)
+
+parser.add_argument("time", type=str, help=msg)
 
 args = parser.parse_args()
 countdown = Countdown(args.time)
